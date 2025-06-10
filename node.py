@@ -5,7 +5,7 @@ import math
 # Definitions
 MAX_ACCELERATION =  0.2 # m/s^2
 MIN_ACCELERATION = -0.2 # m/s^2
-MAX_VELOCITY = 12 # m/s
+MAX_VELOCITY = 10 # m/s
 BATTERY_CAPACITY = 971  # kW * hrs
 MAX_PANEL_POWER  = 0.976  # kW
 COEFFICIENT_DRAG = 0.22
@@ -27,6 +27,7 @@ class Node_Tree:
 		self.print_nodes(head)
 		self.print_track_stats(head)
 
+	# ADJUST THIS TO BEWARE OF GOING OVER TRACK DISTANCE LOOK AT TOTAL DISTANCE DRIVEN VS TRACK_LENGTH IMPLEMENT DISTANCE CLIPPING OR SOMETHING
 	def generate_tree(self):
 		total_position = 0
 		head = Node(self.time_of_day, MAX_ACCELERATION, 0, 0, self.start_percent, self.location)
@@ -60,12 +61,15 @@ Distance_Traveled: {head.end_position - head.start_position:.2f} m
 	def print_track_stats(self, head):
 		track_time = 0
 		power_used = 0
+		distance   = 0
 		while head != None:
 			track_time += head.section_time / 60
 			power_used += 1 - head.end_percentage / head.start_percentage
+			distance   += head.end_position - head.start_position
 			head = head.next_node
-		print (f"Total_Track_Time: {track_time:.2f}")
+		print (f"Total_Track_Time: {track_time:.2f} minutes")
 		print (f"Total_Power_Used: {power_used:.2%}")
+		print (f"Total_Distance:   {distance:.2f} m")
 
 # Every node is responseable for 5% of the track distance.
 class Node:
