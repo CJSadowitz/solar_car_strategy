@@ -23,21 +23,49 @@ class Node_Tree:
 		self.time_of_day = time_of_day
 		self.location = location
 
-		self.tree = self.generate_tree()
+		head = self.generate_tree()
+		self.print_nodes(head)
+		self.print_track_stats(head)
 
 	def generate_tree(self):
+		total_position = 0
 		head = Node(self.time_of_day, MAX_ACCELERATION, 0, 0, self.start_percent, self.location)
-		self.print_node(head)
+		total_position += head.end_position - head.start_position
+		prev_node = head
+		while total_position < TRACK_LENGTH:
+			cur = Node(
+				self.time_of_day + datetime.timedelta(seconds=prev_node.section_time),
+				MAX_ACCELERATION,
+				prev_node.end_velocity,
+				prev_node.end_position,
+				prev_node.end_percentage,
+				self.location)
+			total_position += cur.end_position - cur.start_position
+			prev_node.next_node = cur
+			prev_node = cur
+		return head
 
-	def print_node(self, node):
-		print(f"""
-Section_Time:      {node.section_time / 60:.2f} minutes
-Battery:           {node.start_percentage * BATTERY_CAPACITY:.2f}, {node.end_percentage * BATTERY_CAPACITY:.2f}
-Power_Used:        {1 - node.end_percentage / node.start_percentage:.2%}
-End_Velocity:      {node.end_velocity:.2f} m/s
-Average_Velocity:  {node.average_velocity:.2f} m/s
-Distance_Traveled: {node.end_position:.2f} m
+	def print_nodes(self, head):
+		while head != None:
+			print(f"""
+Section_Time:      {head.section_time / 60:.2f} minutes
+Battery:           {head.start_percentage * BATTERY_CAPACITY:.2f}, {head.end_percentage * BATTERY_CAPACITY:.2f}
+Power_Used:        {1 - head.end_percentage / head.start_percentage:.2%}
+End_Velocity:      {head.end_velocity:.2f} m/s
+Average_Velocity:  {head.average_velocity:.2f} m/s
+Distance_Traveled: {head.end_position - head.start_position:.2f} m
 		""")
+			head = head.next_node
+	
+	def print_track_stats(self, head):
+		track_time = 0
+		power_used = 0
+		while head != None:
+			track_time += head.section_time / 60
+			power_used += 1 - head.end_percentage / head.start_percentage
+			head = head.next_node
+		print (f"Total_Track_Time: {track_time:.2f}")
+		print (f"Total_Power_Used: {power_used:.2%}")
 
 # Every node is responseable for 5% of the track distance.
 class Node:
@@ -47,7 +75,7 @@ class Node:
 		self.end_velocity     = 0            # m/s
 		self.average_velocity = 0            # m/s
 		self.start_position   = start_d      # m
-		self.end_position     = 0            # m
+		self.end_position     = start_d            # m
 		self.section_time     = 0            # s
 		self.start_percentage = start_p
 		self.end_percentage   = None
@@ -61,7 +89,7 @@ class Node:
 		accelerations = []
 
 		velocity = self.start_velocity
-		while self.end_position < TRACK_LENGTH * 0.05:
+		while self.end_position < TRACK_LENGTH * 0.05 + self.start_position:
 			velocity += self.start_velocity + self.acceleration
 			if (velocity > MAX_VELOCITY):
 				velocities.append(MAX_VELOCITY)
@@ -72,8 +100,12 @@ class Node:
 			self.section_time += 1
 			self.end_position += velocities[-1]
 
-		self.average_velocity = sum(velocities) / len(velocities)
-		self.end_velocity = velocities[-1]
+		if len(velocities) != 0:
+			self.average_velocity = sum(velocities) / len(velocities)
+			self.end_velocity = velocities[-1]
+		else:
+			self.average_velocity = 0
+			self.end_velocity = self.start_velocity
 		
 		self.end_percentage = (BATTERY_CAPACITY * start_p + self.power_in(self.section_time) - self.power_out(accelerations)) / BATTERY_CAPACITY
 
