@@ -1,4 +1,3 @@
-from astral import LocationInfo
 from astral.sun import elevation
 import datetime
 import math
@@ -23,64 +22,60 @@ class Node_Tree:
 		self.duration = duration
 		self.time_of_day = time_of_day
 		self.location = location
-		self.interval = None
 
-		self.tree = self.generate_tree(300)
+		self.tree = self.generate_tree()
 
-	def generate_tree(self, sections):
-		self.interval = self.duration / sections
-		head = Node(self.time_of_day, self.interval, MAX_ACCELERATION, 0, 0, self.start_percent, self.location)
+	def generate_tree(self):
+		head = Node(self.time_of_day, MAX_ACCELERATION, 0, 0, self.start_percent, self.location)
 		self.print_node(head)
 
 	def print_node(self, node):
-		print (f"""
-Interval: {self.interval / 60} minutes
-Battery: {node.start_percentage * BATTERY_CAPACITY, node.end_percentage * BATTERY_CAPACITY}
-Power_Used: {node.start_percentage - node.end_percentage}%
-End_Velocity: {node.end_velocity} m/s
-Average_Velocity: {node.average_velocity} m/s
-Distance_Traveled: {node.end_position} m
+		print(f"""
+Section_Time:      {node.section_time / 60:.2f} minutes
+Battery:           {node.start_percentage * BATTERY_CAPACITY:.2f}, {node.end_percentage * BATTERY_CAPACITY:.2f}
+Power_Used:        {1 - node.end_percentage / node.start_percentage:.2%}
+End_Velocity:      {node.end_velocity:.2f} m/s
+Average_Velocity:  {node.average_velocity:.2f} m/s
+Distance_Traveled: {node.end_position:.2f} m
 		""")
 
+# Every node is responseable for 5% of the track distance.
 class Node:
-	def __init__(self, time, interval, acceleration, start_v, start_d, start_p, location):
+	def __init__(self, time, acceleration, start_v, start_d, start_p, location):
 		self.acceleration     = acceleration # m/s^2
 		self.start_velocity   = start_v      # m/s
 		self.end_velocity     = 0            # m/s
 		self.average_velocity = 0            # m/s
 		self.start_position   = start_d      # m
 		self.end_position     = 0            # m
-
-
+		self.section_time     = 0            # s
 		self.start_percentage = start_p
 		self.end_percentage   = None
-
 		self.time = time # DATE
 		self.location = location # OBJECT
-
-		self.calc(start_p, interval)
+		self.calc(start_p)
 		self.next_node = None
 
-	def calc(self, start_p, interval):
+	def calc(self, start_p):
 		velocities = []
 		accelerations = []
-		for i in range(math.ceil(interval)):
-			velocity = self.start_velocity + self.acceleration * i
+
+		velocity = self.start_velocity
+		while self.end_position < TRACK_LENGTH * 0.05:
+			velocity += self.start_velocity + self.acceleration
 			if (velocity > MAX_VELOCITY):
 				velocities.append(MAX_VELOCITY)
 				accelerations.append(0)
 			else:
 				velocities.append(velocity)
 				accelerations.append(self.acceleration)
+			self.section_time += 1
 			self.end_position += velocities[-1]
 
 		self.average_velocity = sum(velocities) / len(velocities)
 		self.end_velocity = velocities[-1]
-
-		if (self.end_velocity > MAX_VELOCITY):
-			self.end_velocity = MAX_VELOCITY
 		
-		self.end_percentage = (BATTERY_CAPACITY * start_p + self.power_in(interval) - self.power_out(accelerations)) / BATTERY_CAPACITY
+		self.end_percentage = (BATTERY_CAPACITY * start_p + self.power_in(self.section_time) - self.power_out(accelerations)) / BATTERY_CAPACITY
 
 	def power_in(self, interval):
 		# SUN CALCULATIONS OVER A GIVEN PERIOD OF TIME
