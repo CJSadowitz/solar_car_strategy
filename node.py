@@ -5,12 +5,12 @@ import math
 # Definitions
 MAX_ACCELERATION =  0.2 # m/s^2
 MIN_ACCELERATION = -0.2 # m/s^2
-MAX_VELOCITY = 10 # m/s
+MAX_VELOCITY = 12 # m/s 9.1
 BATTERY_CAPACITY = 971  # kW * hrs
 MAX_PANEL_POWER  = 0.976  # kW
 COEFFICIENT_DRAG = 0.22
 COEFFICIENT_ROLLING_RESISTANCE = 0.0055
-WEIGHT = 3000 # Newtons
+WEIGHT = 320 # kgs
 GRAVITY = 9.8 # m/s^2
 FRONTAL_AREA = 1.2 # m^2
 TRACK_LENGTH = 5069.434 # m
@@ -34,9 +34,10 @@ class Node_Tree:
 		total_position += head.end_position - head.start_position
 		prev_node = head
 		while total_position < TRACK_LENGTH:
+			acceleration = MAX_ACCELERATION * 0.2
 			cur = Node(
 				self.time_of_day + datetime.timedelta(seconds=prev_node.section_time),
-				MAX_ACCELERATION,
+				acceleration,
 				prev_node.end_velocity,
 				prev_node.end_position,
 				prev_node.end_percentage,
@@ -57,7 +58,7 @@ Average_Velocity:  {head.average_velocity:.2f} m/s
 Distance_Traveled: {head.end_position - head.start_position:.2f} m
 		""")
 			head = head.next_node
-	
+
 	def print_track_stats(self, head):
 		track_time = 0
 		power_used = 0
@@ -68,7 +69,9 @@ Distance_Traveled: {head.end_position - head.start_position:.2f} m
 			distance   += head.end_position - head.start_position
 			head = head.next_node
 		print (f"Total_Track_Time: {track_time:.2f} minutes")
+		print (f"Laps_Time: {math.floor((self.duration / 60) / track_time):.2f}")
 		print (f"Total_Power_Used: {power_used:.2%}")
+		print (f"Laps_Power: {math.floor((self.start_percent - self.end_percent) / power_used):.2f}")
 		print (f"Total_Distance:   {distance:.2f} m")
 
 # Every node is responseable for 5% of the track distance.
@@ -94,7 +97,7 @@ class Node:
 
 		velocity = self.start_velocity
 		while self.end_position < TRACK_LENGTH * 0.05 + self.start_position:
-			velocity += self.start_velocity + self.acceleration
+			velocity = velocity + self.acceleration
 			if (velocity > MAX_VELOCITY):
 				velocities.append(MAX_VELOCITY)
 				accelerations.append(0)
@@ -110,7 +113,7 @@ class Node:
 		else:
 			self.average_velocity = 0
 			self.end_velocity = self.start_velocity
-		
+
 		self.end_percentage = (BATTERY_CAPACITY * start_p + self.power_in(self.section_time) - self.power_out(accelerations)) / BATTERY_CAPACITY
 
 	def power_in(self, interval):
@@ -138,7 +141,7 @@ class Node:
 		# Power Calc
 		forces = []
 		for acceleration in accelerations:
-			forces.append(acceleration * WEIGHT / GRAVITY + (drag_f + crr_f))
+			forces.append(acceleration * WEIGHT + (drag_f + crr_f))
 
 		power = sum(forces) * self.average_velocity
 		return power / 3600
