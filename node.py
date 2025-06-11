@@ -77,7 +77,6 @@ class Node:
 		# print (f"POWER  IN: {power / 3600:.4f}")
 		return power / 3600 
 
-	# RETURNS Kw * hrs
 	def power_out(self, a, v, t):
 		# USING SPEED DETERMINE POWER COST
 		power = 0

@@ -11,10 +11,6 @@ class Node_List:
 		self.time_of_day = time_of_day
 		self.location = location
 
-		head = self.generate_tree(100)
-		self.print_nodes(head)
-		self.print_track_stats(head)
-
 	def generate_tree(self, sections):
 		head = Node(sections, self.time_of_day, constants.MAX_ACCELERATION, 0, 0, self.start_percent, self.location)
 		prev_node = head
@@ -41,7 +37,7 @@ Power_Used:        {1 - head.end_percentage / head.start_percentage:.2%}
 End_Velocity:      {head.end_velocity:.2f} m/s
 Average_Velocity:  {head.average_velocity:.2f} m/s
 Distance_Traveled: {head.end_position - head.start_position:.2f} m
-			""")
+            """)
 			head = head.next_node
 
 	def print_track_stats(self, head):
