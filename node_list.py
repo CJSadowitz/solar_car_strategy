@@ -1,0 +1,62 @@
+from node import Node
+import constants
+import datetime
+import math
+
+class Node_List:
+	def __init__(self, start_percent, end_percent, duration, time_of_day, location):
+		self.start_percent = start_percent
+		self.end_percent = end_percent
+		self.duration = duration
+		self.time_of_day = time_of_day
+		self.location = location
+
+		head = self.generate_tree(100)
+		self.print_nodes(head)
+		self.print_track_stats(head)
+
+	def generate_tree(self, sections):
+		head = Node(sections, self.time_of_day, constants.MAX_ACCELERATION, 0, 0, self.start_percent, self.location)
+		prev_node = head
+		for i in range(sections - 1):
+			acceleration = constants.MAX_ACCELERATION * 0.2
+			cur = Node(
+				sections,
+				self.time_of_day + datetime.timedelta(seconds=prev_node.section_time),
+				acceleration,
+				prev_node.end_velocity,
+				prev_node.end_position,
+				prev_node.end_percentage,
+				self.location)
+			prev_node.next_node = cur
+			prev_node = cur
+		return head
+
+	def print_nodes(self, head):
+		while head != None:
+			print(f"""
+Section_Time:      {head.section_time / 60:.2f} minutes
+Battery:           {head.start_percentage * constants.BATTERY_CAPACITY:.2f}, {head.end_percentage * constants.BATTERY_CAPACITY:.2f}
+Power_Used:        {1 - head.end_percentage / head.start_percentage:.2%}
+End_Velocity:      {head.end_velocity:.2f} m/s
+Average_Velocity:  {head.average_velocity:.2f} m/s
+Distance_Traveled: {head.end_position - head.start_position:.2f} m
+			""")
+			head = head.next_node
+
+	def print_track_stats(self, head):
+		track_time = 0
+		power_used = 0
+		distance   = 0
+		while head != None:
+			track_time += head.section_time / 60
+			power_used += 1 - head.end_percentage / head.start_percentage
+			distance   += head.end_position - head.start_position
+			head = head.next_node
+		print ("===========================================")
+		print (f"Total_Lap_Time:   {track_time:.2f} minutes")
+		print (f"Laps_Time:        {math.floor((self.duration / 60) / track_time):.2f}")
+		print (f"Total_Power_Used: {power_used:.2%}")
+		print (f"Laps_Power:       {math.floor((self.start_percent - self.end_percent) / power_used):.2f}")
+		print (f"Total_Distance:   {distance:.2f} m")
+		print ("===========================================")
