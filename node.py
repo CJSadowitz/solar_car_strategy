@@ -75,6 +75,7 @@ class Node:
 
 		# kW * hrs
 		# print (f"POWER  IN: {power / 3600:.4f}")
+		self.section_power_in = power / 3600 
 		return power / 3600 
 
 	def power_out(self, a, v, t):
@@ -93,7 +94,7 @@ class Node:
 
 		# W * hrs
 		power = power / 3600
-
 		# kW * hrs
 		# print (f"POWER OUT: {power / 1000:.4f}")
+		self.section_power_out = power / 1000 
 		return power / 1000
