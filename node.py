@@ -15,6 +15,7 @@ GRAVITY = 9.81 # m/s^2
 WEIGHT = MASS * GRAVITY
 FRONTAL_AREA = 1.2 # m^2
 TRACK_LENGTH = 5069.434 # m
+PARASITIC_FACTOR = 1.0 # %
 
 class Node_Tree:
 	def __init__(self, start_percent, end_percent, duration, time_of_day, location):
@@ -66,11 +67,13 @@ Distance_Traveled: {head.end_position - head.start_position:.2f} m
 			power_used += 1 - head.end_percentage / head.start_percentage
 			distance   += head.end_position - head.start_position
 			head = head.next_node
-		print (f"Total_Track_Time: {track_time:.2f} minutes")
+		print ("===========================================")
+		print (f"Total_Lap_Time:   {track_time:.2f} minutes")
 		print (f"Laps_Time:        {math.floor((self.duration / 60) / track_time):.2f}")
 		print (f"Total_Power_Used: {power_used:.2%}")
 		print (f"Laps_Power:       {math.floor((self.start_percent - self.end_percent) / power_used):.2f}")
 		print (f"Total_Distance:   {distance:.2f} m")
+		print ("===========================================")
 
 # Every node is responsable for 5% of the track distance.
 class Node:
@@ -156,9 +159,12 @@ class Node:
 			forces = a[i] * MASS + drag_f + crr_f
 			# W * s
 			power += forces * v[i] * t[i]
+			# PARASITIC LOSSES
+
+			power += PARASITIC_FACTOR * 30 * t[i]
+
 		# GRAVITY
 
-		# PARASITIC LOSSES
 
 		# W * hrs
 		power = power / 3600
