@@ -5,8 +5,8 @@ import math
 # Definitions
 MAX_ACCELERATION =  0.2 # m/s^2
 MIN_ACCELERATION = -0.2 # m/s^2
-MAX_VELOCITY = 6.3 # m/s 9.1
-BATTERY_CAPACITY = 971  # kW * hrs
+MAX_VELOCITY = 7.8 # m/s 9.1
+BATTERY_CAPACITY = 5.1  # kW * hrs
 MAX_PANEL_POWER  = 0.976  # kW
 COEFFICIENT_DRAG = 0.22
 COEFFICIENT_ROLLING_RESISTANCE = 0.0055
@@ -74,7 +74,7 @@ class Node_Tree:
 		print (f"Laps_Power: {math.floor((self.start_percent - self.end_percent) / power_used):.2f}")
 		print (f"Total_Distance:   {distance:.2f} m")
 
-# Every node is responseable for 5% of the track distance.
+# Every node is responsable for 5% of the track distance.
 class Node:
 	def __init__(self, time, acceleration, start_v, start_d, start_p, location):
 		self.acceleration     = acceleration # m/s^2
@@ -99,14 +99,13 @@ class Node:
 		vi = self.start_velocity
 		a = self.acceleration
 		vf = vi
-		for i in range(math.floor(TRACK_LENGTH * 0.05)):
+		for i in range(math.ceil(TRACK_LENGTH * 0.05)):
 			if (vf >= MAX_VELOCITY):
 				a = 0
 
 			vf = math.sqrt(math.pow(vi, 2) + 2 * a * 1)
 			velocities.append(vf)
 			accelerations.append(a)
-
 			times.append((2 * 1) / (vi + vf))
 
 			vi = vf
@@ -119,41 +118,50 @@ class Node:
 			self.average_velocity = sum(velocities) / len(velocities)
 			self.end_velocity = velocities[-1]
 		else:
-			self.average_velocity = 0
+			self.average_velocity = self.start_velocity
 			self.end_velocity = self.start_velocity
 
 		self.end_percentage = (BATTERY_CAPACITY * start_p +
-			self.power_in(self.section_time) -
-			(self.power_out(accelerations) * self.section_time / 3600)
+			self.power_in(times) -
+			(self.power_out(accelerations, velocities, times))
 			) / BATTERY_CAPACITY
 
-	def power_in(self, interval):
+	def power_in(self, times):
 		# SUN CALCULATIONS OVER A GIVEN PERIOD OF TIME
 		city = self.location
 		time_now = self.time
-		power = 0
-		for i in range(math.floor(interval)):
+		power_in = 0
+		for t in times:
 			solar_altitude = elevation(city.observer, time_now)
-			power += MAX_PANEL_POWER * math.cos(math.radians(solar_altitude))
-			time_now = time_now + datetime.timedelta(seconds=1)
+			time_now = time_now + datetime.timedelta(seconds=t)
+			power = MAX_PANEL_POWER * math.cos(math.radians(solar_altitude))
+			# kW * s
+			power_in = power * t
+			
 		# GRAVITY
 		gravity = 0
 		# REGEN
 		regen = 0
+
+		# kW * hrs
+		# print (f"POWER  IN: {power / 3600:.4f}")
 		return power / 3600 
 
-	# RETURNS Kw
-	def power_out(self, accelerations):
+	# RETURNS Kw * hrs
+	def power_out(self, a, v, t):
 		# USING SPEED DETERMINE POWER COST
-		drag_f = (0.0451) * math.pow(self.average_velocity * 3.6, 2) * FRONTAL_AREA * COEFFICIENT_DRAG
-		# ROLLING RESISTANCE
-		crr_f = COEFFICIENT_ROLLING_RESISTANCE * (1 + (self.average_velocity * 3.6) / 161) * WEIGHT # NEWTONS
+		power = 0
+		for i in range(len(v)):
+			drag_f = (0.0451) * math.pow(v[i] * 3.6, 2) * FRONTAL_AREA * COEFFICIENT_DRAG
+			crr_f = COEFFICIENT_ROLLING_RESISTANCE * (1 + (v[i] * 3.6) / 161) * WEIGHT
+			forces = a[i] * MASS + drag_f + crr_f
+			# W * s
+			power += forces * v[i] * t[i]
 		# GRAVITY
 
-		# Power Calc
-		forces = []
-		for acceleration in accelerations:
-			forces.append(acceleration * MASS + (drag_f + crr_f))
+		# W * hrs
+		power = power / 3600
 
-		power = sum(forces) * self.average_velocity
+		# kW * hrs
+		# print (f"POWER OUT: {power / 1000:.4f}")
 		return power / 1000
