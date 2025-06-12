@@ -17,16 +17,15 @@ class Node:
 		self.end_percentage   = 0
 		self.time = t             # DATE
 		self.location = location  # OBJECT
-
-		self.calc(bi)
+		# How much time and percent each section can use
+		self.t = section_duration
+		self.section_percent  = section_percent
+		
+		self.calc()
 		self.next_node = None
 
-		self.section_duration = section_duration
-		self.section_percent  = section_percent
-		print (self.section_time / section_duration)
-		print (((self.section_power_in - self.section_power_out) / constants.BATTERY_CAPACITY) / section_percent)
 
-	def calc(self, start_p):
+	def calc(self):
 		velocities = []
 		accelerations = []
 		times = []
@@ -34,6 +33,9 @@ class Node:
 		vi = self.start_velocity
 		a = constants.MAX_ACCELERATION # ADJUST THIS TO ATTEMPT TO ACHIEVE DESIRED RATIO
 		vf = vi
+		# Given desired time used and percentage, I can calc desired velocity
+		# desired_vf = vi + a * self.t
+		# print (f"{desired_vf:.2f}, {self.t:.2f} sec")
 		for i in range(math.ceil(constants.TRACK_LENGTH / self.track_section)):
 			if (vf >= constants.MAX_VELOCITY):
 				a = 0
@@ -56,10 +58,29 @@ class Node:
 			self.average_velocity = self.start_velocity
 			self.end_velocity = self.start_velocity
 
-		self.end_percentage = (constants.BATTERY_CAPACITY * start_p +
+
+		power_used = (self.power_in(times) - self.power_out(accelerations, velocities, times)) / constants.BATTERY_CAPACITY
+		print (f"{self.power_in(times):.4f}, {power_used:.4f}, {sum(times):.2f}")
+
+		self.end_percentage = (constants.BATTERY_CAPACITY * self.start_percentage +
 			self.power_in(times) -
 			(self.power_out(accelerations, velocities, times))
 			) / constants.BATTERY_CAPACITY
+		
+
+		# if (self.section_time / self.t < 1 and self.section_percent / power_used > 1):
+		# 	# THIS TELLS ME THAT BOTH TIME AND POWER CAN HANDLE MORE LAPS OR CAN GO FASTER
+		# 	print ("MORE LAPS")
+		# 	# print ("USED, ALLOTED")
+		# 	# print (f"{self.section_time:.2f}, {self.t:.2f}")
+		# 	# print (f"{power_used:.2%}, {self.section_percent:.2%}")
+
+		# if (self.section_time / self.t > 1 or self.section_percent / power_used < 1):
+		# 	# THIS TELLS ME THAT I CANNOT HANDLE THIS NUMBER OF LAPS OR NEEDS TO GO SLOWER
+		# 	print ("LESS LAPS")
+		# 	print ("USED, ALLOTED")
+		# 	print (f"{self.section_time:.2f}, {self.t:.2f}")
+		# 	print (f"{power_used:.2%}, {self.section_percent:.2%}")
 
 	def power_in(self, times):
 		# SUN CALCULATIONS OVER A GIVEN PERIOD OF TIME
@@ -69,9 +90,10 @@ class Node:
 		for t in times:
 			solar_altitude = elevation(city.observer, time_now)
 			time_now = time_now + datetime.timedelta(seconds=t)
+			# kW
 			power = constants.MAX_PANEL_POWER * math.cos(math.radians(solar_altitude))
 			# kW * s
-			power_in = power * t
+			power_in += power * t
 		# GRAVITY
 		gravity = 0
 		# REGEN
@@ -79,26 +101,27 @@ class Node:
 
 		# kW * hrs
 		# print (f"POWER  IN: {power / 3600:.4f}")
-		self.section_power_in = power / 3600
-		return power / 3600
+		self.section_power_in = power_in / 3600
+		return power_in / 3600
 
 	def power_out(self, a, v, t):
 		# USING SPEED DETERMINE POWER COST
-		power = 0
+		energy = 0
 		for i in range(len(v)):
 			drag_f = (0.0451) * math.pow(v[i] * 3.6, 2) * constants.FRONTAL_AREA * constants.COEFFICIENT_DRAG
 			crr_f = constants.COEFFICIENT_ROLLING_RESISTANCE * (1 + (v[i] * 3.6) / 161) * constants.WEIGHT
 			forces = a[i] * constants.MASS + drag_f + crr_f
+			# W
+			power = forces * v[i]
 			# W * s
-			power += forces * v[i] * t[i]
+			energy = power * t[i]
 			# PARASITIC LOSSES
-			power += constants.PARASITIC_FACTOR * 30 * t[i]
+			energy += constants.PARASITIC_FACTOR * 30 * t[i]
 
 		# GRAVITY
 
 		# W * hrs
-		power = power / 3600
+		energy = energy / 3600
 		# kW * hrs
-		# print (f"POWER OUT: {power / 1000:.4f}")
-		self.section_power_out = power / 1000 
-		return power / 1000
+		self.section_power_out = energy / 1000
+		return (energy / 1000) / constants.MOTOR_EFFICIENCY

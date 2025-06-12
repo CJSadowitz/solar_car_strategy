@@ -13,7 +13,15 @@ class Node_List:
 
 
 	def generate_list(self, sections):
-		head = Node(sections, self.time_of_day, 0, 0, self.start_percent, self.location, self.total_duration, self.total_percent)
+		head = Node(
+			sections,
+			self.time_of_day,
+			0,
+			0,
+			self.start_percent,
+			self.location,
+			self.total_duration / constants.SECTIONS,
+			self.total_percent / constants.SECTIONS)
 		prev_node = head
 		for i in range(sections - 1):
 			cur = Node(
@@ -23,8 +31,8 @@ class Node_List:
 				prev_node.end_position,
 				prev_node.end_percentage,
 				self.location,
-				self.total_duration,
-				self.total_percent)
+				self.total_duration / constants.SECTIONS,
+				self.total_percent / constants.SECTIONS)
 			prev_node.next_node = cur
 			prev_node = cur
 		return head

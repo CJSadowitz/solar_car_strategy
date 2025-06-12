@@ -12,15 +12,16 @@ class Track:
         self.duration = duration
 
     def get_day_info(self):
+        # Some laps will be more constant, currently starting from stop for every lap
         laps = []
         time_driven = 0
-        # Some laps will be more constant, currently starting from stop for every lap
         battery_i = self.b_i
-        while time_driven < self.duration and math.floor(battery_i * 100) > self.b_f * 100:
+        num_laps = 1
+        for i in range(num_laps):
             lap = Node_List(
                 battery_i,
-                self.duration,
-                (self.b_f - self.b_i),
+                self.duration / num_laps,
+                (self.b_i - self.b_f) / num_laps,
                 self.day,
                 self.loc,
                 constants.SECTIONS

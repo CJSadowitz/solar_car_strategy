@@ -13,3 +13,4 @@ PARASITIC_FACTOR               = 1.0            # %
 COEFFICIENT_DRAG               = 0.22
 COEFFICIENT_ROLLING_RESISTANCE = 0.0055
 SECTIONS                       = 10
+MOTOR_EFFICIENCY               = 0.80

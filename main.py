@@ -11,7 +11,7 @@ def main():
 	start_time = datetime(2025, 7, 3, 10, 0)
 	battery_initial = 1.00
 	battery_final   = 0.66
-	day_1 = Track(location, start_time, 4, battery_initial, battery_final, 800)
+	day_1 = Track(location, start_time, 4, battery_initial, battery_final, 28800)
 	day_1.get_day_info()
 	print (day_1.get_laps(), "laps")
 
