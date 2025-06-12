@@ -50,7 +50,7 @@ class Node_List:
 			print(f"""
 Section_Time:      {head.section_time / 60:.2f} minutes
 Battery:           {head.start_percentage * constants.BATTERY_CAPACITY:.2f}, {head.end_percentage * constants.BATTERY_CAPACITY:.2f}
-Power_Used:        {1 - head.end_percentage / head.start_percentage:.2%}
+Power_Used:        {(1 - head.end_percentage / head.start_percentage) * constants.BATTERY_CAPACITY:.2f} W
 End_Velocity:      {head.end_velocity:.2f} m/s
 Average_Velocity:  {head.average_velocity:.2f} m/s
 Distance_Traveled: {head.end_position - head.start_position:.2f} m
@@ -59,7 +59,6 @@ Distance_Traveled: {head.end_position - head.start_position:.2f} m
 
 	def print_lap_stats(self):
 		track_time = 0
-		power_used = 0
 		distance   = 0
 		power_in   = 0
 		power_out  = 0
@@ -67,7 +66,6 @@ Distance_Traveled: {head.end_position - head.start_position:.2f} m
 		final_percentage = 0
 		while head != None:
 			track_time += head.section_time / 60
-			power_used += 1 - head.end_percentage / head.start_percentage
 			distance   += head.end_position - head.start_position
 			power_in   += head.section_power_in
 			power_out  += head.section_power_out
@@ -76,10 +74,9 @@ Distance_Traveled: {head.end_position - head.start_position:.2f} m
 			head = head.next_node
 		print ("===========================================")
 		print (f"Total_Lap_Time:   {track_time:.2f} minutes")
-		print (f"Total_Power_Used: {power_used:.2%}")
 		print (f"Start_Percentage: {self.head.start_percentage:.2%}")
 		print (f"End_Percentage:   {final_percentage:.2%}")
 		print (f"Total_Distance:   {distance:.2f} m")
-		print (f"Total_Power_In:   {power_in:.4f}")
-		print (f"Total_Power_Out:  {power_out:.4f}")
+		print (f"Total_Power_In:   {power_in:.4f} kW")
+		print (f"Total_Power_Out:  {power_out:.4f} kW")
 		print ("===========================================")

@@ -1,5 +1,6 @@
 import constants
 from node_list import Node_List
+import math
 
 class Track:
     def __init__(self, location, day, driver_count, b_i, b_f, duration):
@@ -16,8 +17,7 @@ class Track:
         battery_used = 0
         # Some laps will be more constant, currently starting from stop for every lap
         battery_i = self.b_i
-        while time_driven < self.duration and battery_i > self.b_f:
-            print (battery_i)
+        while time_driven < self.duration and math.floor(battery_i * 100) > self.b_f * 100:
             lap = Node_List(battery_i, 0, self.day, self.loc, 10)
             battery_i = lap.get_b_f()
             time_driven  += lap.get_time()
@@ -27,8 +27,7 @@ class Track:
         self.battery_used = self.b_i - battery_i
         self.laps = laps
 
-        print (f"{time_driven / 60:.2f} minutes")
-        print (f"{battery_used:.2%}")
+        print (f"{time_driven / 3600:.2f} hours")
 
     def get_battery_final(self):
         return self.b_i - self.battery_used

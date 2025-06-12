@@ -67,7 +67,6 @@ class Node:
 			power = constants.MAX_PANEL_POWER * math.cos(math.radians(solar_altitude))
 			# kW * s
 			power_in = power * t
-			
 		# GRAVITY
 		gravity = 0
 		# REGEN
@@ -75,8 +74,8 @@ class Node:
 
 		# kW * hrs
 		# print (f"POWER  IN: {power / 3600:.4f}")
-		self.section_power_in = power / 3600 
-		return power / 3600 
+		self.section_power_in = power / 3600
+		return power / 3600
 
 	def power_out(self, a, v, t):
 		# USING SPEED DETERMINE POWER COST
