@@ -5,9 +5,8 @@ import constants
 
 # Every node is responsable for 5% of the track distance.
 class Node:
-	def __init__(self, sections, t, a, vi, pi, bi, location):
+	def __init__(self, sections, t, vi, pi, bi, location, section_duration, section_percent):
 		self.track_section    = sections
-		self.acceleration     = a  # m/s^2
 		self.start_velocity   = vi # m/s
 		self.end_velocity     = 0  # m/s
 		self.average_velocity = 0  # m/s
@@ -18,8 +17,14 @@ class Node:
 		self.end_percentage   = 0
 		self.time = t             # DATE
 		self.location = location  # OBJECT
+
 		self.calc(bi)
 		self.next_node = None
+
+		self.section_duration = section_duration
+		self.section_percent  = section_percent
+		print (self.section_time / section_duration)
+		print (((self.section_power_in - self.section_power_out) / constants.BATTERY_CAPACITY) / section_percent)
 
 	def calc(self, start_p):
 		velocities = []
@@ -27,7 +32,7 @@ class Node:
 		times = []
 
 		vi = self.start_velocity
-		a = self.acceleration
+		a = constants.MAX_ACCELERATION # ADJUST THIS TO ATTEMPT TO ACHIEVE DESIRED RATIO
 		vf = vi
 		for i in range(math.ceil(constants.TRACK_LENGTH / self.track_section)):
 			if (vf >= constants.MAX_VELOCITY):

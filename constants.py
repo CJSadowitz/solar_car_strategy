@@ -12,3 +12,4 @@ TRACK_LENGTH                   = 5069.434       # m
 PARASITIC_FACTOR               = 1.0            # %
 COEFFICIENT_DRAG               = 0.22
 COEFFICIENT_ROLLING_RESISTANCE = 0.0055
+SECTIONS                       = 10

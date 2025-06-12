@@ -14,11 +14,18 @@ class Track:
     def get_day_info(self):
         laps = []
         time_driven = 0
-        battery_used = 0
         # Some laps will be more constant, currently starting from stop for every lap
         battery_i = self.b_i
         while time_driven < self.duration and math.floor(battery_i * 100) > self.b_f * 100:
-            lap = Node_List(battery_i, 0, self.day, self.loc, 10)
+            lap = Node_List(
+                battery_i,
+                self.duration,
+                (self.b_f - self.b_i),
+                self.day,
+                self.loc,
+                constants.SECTIONS
+                )
+            
             battery_i = lap.get_b_f()
             time_driven  += lap.get_time()
             lap.print_lap_stats()

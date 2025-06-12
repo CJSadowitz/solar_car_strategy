@@ -1,28 +1,30 @@
 from node import Node
 import constants
 import datetime
-import math
 
 class Node_List:
-	def __init__(self, start_percent, duration, time_of_day, location, sections):
+	def __init__(self, start_percent, total_duration, total_perecent, time_of_day, location, sections):
 		self.start_percent = start_percent
 		self.time_of_day = time_of_day
 		self.location = location
+		self.total_duration = total_duration
+		self.total_percent = total_perecent
 		self.head = self.generate_list(sections)
 
+
 	def generate_list(self, sections):
-		head = Node(sections, self.time_of_day, constants.MAX_ACCELERATION, 0, 0, self.start_percent, self.location)
+		head = Node(sections, self.time_of_day, 0, 0, self.start_percent, self.location, self.total_duration, self.total_percent)
 		prev_node = head
 		for i in range(sections - 1):
-			acceleration = constants.MAX_ACCELERATION * 0.2
 			cur = Node(
 				sections,
 				self.time_of_day + datetime.timedelta(seconds=prev_node.section_time),
-				acceleration,
 				prev_node.end_velocity,
 				prev_node.end_position,
 				prev_node.end_percentage,
-				self.location)
+				self.location,
+				self.total_duration,
+				self.total_percent)
 			prev_node.next_node = cur
 			prev_node = cur
 		return head
@@ -47,14 +49,12 @@ class Node_List:
 	def print_nodes(self):
 		head = self.head
 		while head != None:
-			print(f"""
-Section_Time:      {head.section_time / 60:.2f} minutes
-Battery:           {head.start_percentage * constants.BATTERY_CAPACITY:.2f}, {head.end_percentage * constants.BATTERY_CAPACITY:.2f}
-Power_Used:        {(1 - head.end_percentage / head.start_percentage) * constants.BATTERY_CAPACITY:.2f} W
-End_Velocity:      {head.end_velocity:.2f} m/s
-Average_Velocity:  {head.average_velocity:.2f} m/s
-Distance_Traveled: {head.end_position - head.start_position:.2f} m
-            """)
+			print (f"Battery:           {head.start_percentage * constants.BATTERY_CAPACITY:.2f}, {head.end_percentage * constants.BATTERY_CAPACITY:.2f}")
+			print (f"Power_Used:        {(1 - head.end_percentage / head.start_percentage) * constants.BATTERY_CAPACITY:.2f} W")
+			print (f"Section_Time:      {head.section_time / 60:.2f} minutes")
+			print (f"End_Velocity:      {head.end_velocity:.2f} m/s")
+			print (f"Average_Velocity:  {head.average_velocity:.2f} m/s")
+			print (f"Distance_Traveled: {head.end_position - head.start_position:.2f} m")
 			head = head.next_node
 
 	def print_lap_stats(self):
@@ -64,17 +64,20 @@ Distance_Traveled: {head.end_position - head.start_position:.2f} m
 		power_out  = 0
 		head = self.head
 		final_percentage = 0
+		average_velocity = []
 		while head != None:
 			track_time += head.section_time / 60
 			distance   += head.end_position - head.start_position
 			power_in   += head.section_power_in
 			power_out  += head.section_power_out
+			average_velocity.append(head.average_velocity)
 			if (head.next_node == None):
 				final_percentage = head.end_percentage
 			head = head.next_node
 		print ("===========================================")
 		print (f"Total_Lap_Time:   {track_time:.2f} minutes")
 		print (f"Start_Percentage: {self.head.start_percentage:.2%}")
+		print (f"Average_Velocity: {sum(average_velocity) / len(average_velocity)}")
 		print (f"End_Percentage:   {final_percentage:.2%}")
 		print (f"Total_Distance:   {distance:.2f} m")
 		print (f"Total_Power_In:   {power_in:.4f} kW")
