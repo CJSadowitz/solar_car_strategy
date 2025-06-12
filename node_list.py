@@ -34,12 +34,13 @@ class Node_List:
 			lap_time += head.section_time
 			head = head.next_node
 		return lap_time
-	
+
 	def get_b_f(self):
 		head = self.head
 		used = 0
 		while head != None:
-			used += 1 - head.end_percentage / head.start_percentage
+			if (head.next_node == None):
+				used = head.end_percentage
 			head = head.next_node
 		return used
 

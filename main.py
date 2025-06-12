@@ -16,20 +16,20 @@ def main():
 	print (day_1.get_laps())
 
 	# July 3, 2025, 10:00 AM CT
-	start_time = datetime(2025, 7, 4, 10, 0)
-	battery_initial = day_1.get_battery_final()
-	battery_final   = 0.33
-	day_2 = Track(location, start_time, 4, battery_initial, battery_final, 28800)
-	day_2.get_day_info()
-	print (day_2.get_laps())
+	# start_time = datetime(2025, 7, 4, 10, 0)
+	# battery_initial = day_1.get_battery_final()
+	# battery_final   = 0.33
+	# day_2 = Track(location, start_time, 4, battery_initial, battery_final, 28800)
+	# day_2.get_day_info()
+	# print (day_2.get_laps())
 
 	 # July 3, 2025, 10:00 AM CT
-	start_time = datetime(2025, 7, 5, 10, 0)
-	battery_initial = day_2.get_battery_final()
-	battery_final   = 0.00
-	day_3 = Track(location, start_time, 4, battery_initial, battery_final, 28800)
-	day_3.get_day_info()
-	print (day_3.get_laps())
+	# start_time = datetime(2025, 7, 5, 10, 0)
+	# battery_initial = day_2.get_battery_final()
+	# battery_final   = 0.00
+	# day_3 = Track(location, start_time, 4, battery_initial, battery_final, 28800)
+	# day_3.get_day_info()
+	# print (day_3.get_laps())
 
 if __name__ == "__main__":
 	main()
