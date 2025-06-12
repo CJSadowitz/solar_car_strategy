@@ -29,7 +29,7 @@ class Node:
 		vi = self.start_velocity
 		a = constants.MAX_ACCELERATION
 		vf = vi
-		total_power = 0
+		total_energy = 0
 		times = []
 		for i in range(math.ceil(constants.TRACK_LENGTH / self.track_section)):
 			if (vf >= constants.MAX_VELOCITY):
@@ -40,40 +40,23 @@ class Node:
 			times.append(t)
 			# N * m
 			delta_work = (0.5 * constants.MASS * vf ** 2) - (0.5 * constants.MASS * vi ** 2)
-			sum_work = delta_work + crr_force(vf) * 1 + drag_force(vf) * 1
+			sum_work = delta_work + (crr_force(vf) + drag_force(vf)) * 1
 			# W
-			power = sum_work / t
-			total_power += power * t
-			# print (force, t, vf, crr_force(vf), drag_force(vf))
+			power = sum_work / t + constants.PARASITIC_FACTOR * 30
+			# W * s
+			total_energy += power * t
 			vi = vf
 
 		self.end_velocity = vf
 
-		total_energy_out = total_power
+		total_energy_out = total_energy
+		# W * hrs
 		total_energy_out = total_energy_out / 3600
+		# kW * hrs
 		total_energy_out = total_energy_out / 1000
 
 		print (f"Power out: {total_energy_out / constants.MOTOR_EFFICIENCY:.4f}, ", end="")
 		print (f"Power in:  {self.power_in(times):.4f}, {sum(times):.2f}")
-		# self.section_time = sum(times)
-
-		# self.end_position = constants.TRACK_LENGTH / self.track_section + self.start_position
-
-		# if len(velocities) != 0:
-		# 	self.average_velocity = sum(velocities) / len(velocities)
-		# 	self.end_velocity = velocities[-1]
-		# else:
-		# 	self.average_velocity = self.start_velocity
-		# 	self.end_velocity = self.start_velocity
-
-
-		# power_used = (self.power_in(times) - self.power_out(accelerations, velocities, times)) / constants.BATTERY_CAPACITY
-		# print (f"{self.power_in(times):.4f}, {power_used:.4f}, {sum(times):.2f}")
-
-		# self.end_percentage = (constants.BATTERY_CAPACITY * self.start_percentage +
-		# 	self.power_in(times) -
-		# 	(self.power_out(accelerations, velocities, times))
-		# 	) / constants.BATTERY_CAPACITY
 
 	def power_in(self, times):
 		# SUN CALCULATIONS OVER A GIVEN PERIOD OF TIME
@@ -96,28 +79,6 @@ class Node:
 		# print (f"POWER  IN: {power / 3600:.4f}")
 		self.section_power_in = power_in / 3600
 		return power_in / 3600
-
-	def power_out(self, a, v, t):
-		# USING SPEED DETERMINE POWER COST
-		energy = 0
-		for i in range(len(v)):
-			drag_f = (0.0451) * math.pow(v[i] * 3.6, 2) * constants.FRONTAL_AREA * constants.COEFFICIENT_DRAG
-			crr_f = constants.COEFFICIENT_ROLLING_RESISTANCE * (1 + (v[i] * 3.6) / 161) * constants.WEIGHT
-			forces = a[i] * constants.MASS + drag_f + crr_f
-			# W
-			power = forces * v[i]
-			# W * s
-			energy = power * t[i]
-			# PARASITIC LOSSES
-			energy += constants.PARASITIC_FACTOR * 30 * t[i]
-
-		# GRAVITY
-
-		# W * hrs
-		energy = energy / 3600
-		# kW * hrs
-		self.section_power_out = energy / 1000
-		return (energy / 1000) / constants.MOTOR_EFFICIENCY
 
 def crr_force(v):
 	return constants.COEFFICIENT_ROLLING_RESISTANCE * (1 + (v * 3.6) / 161) * constants.WEIGHT
