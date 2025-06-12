@@ -26,61 +26,54 @@ class Node:
 
 
 	def calc(self):
-		velocities = []
-		accelerations = []
-		times = []
-
 		vi = self.start_velocity
-		a = constants.MAX_ACCELERATION # ADJUST THIS TO ATTEMPT TO ACHIEVE DESIRED RATIO
+		a = constants.MAX_ACCELERATION
 		vf = vi
-		# Given desired time used and percentage, I can calc desired velocity
-		# desired_vf = vi + a * self.t
-		# print (f"{desired_vf:.2f}, {self.t:.2f} sec")
+		total_power = 0
+		times = []
 		for i in range(math.ceil(constants.TRACK_LENGTH / self.track_section)):
 			if (vf >= constants.MAX_VELOCITY):
 				a = 0
 
-			vf = math.sqrt(math.pow(vi, 2) + 2 * a * 1)
-			velocities.append(vf)
-			accelerations.append(a)
-			times.append((2 * 1) / (vi + vf))
-
+			vf = math.sqrt(vi ** 2 + 2 * a * 1)
+			t = ((2 * 1) / (vi + vf))
+			times.append(t)
+			# N * m
+			delta_work = (0.5 * constants.MASS * vf ** 2) - (0.5 * constants.MASS * vi ** 2)
+			sum_work = delta_work + crr_force(vf) * 1 + drag_force(vf) * 1
+			# W
+			power = sum_work / t
+			total_power += power * t
+			# print (force, t, vf, crr_force(vf), drag_force(vf))
 			vi = vf
-		
-		self.section_time = sum(times)
 
-		self.end_position = constants.TRACK_LENGTH / self.track_section + self.start_position
+		self.end_velocity = vf
 
-		if len(velocities) != 0:
-			self.average_velocity = sum(velocities) / len(velocities)
-			self.end_velocity = velocities[-1]
-		else:
-			self.average_velocity = self.start_velocity
-			self.end_velocity = self.start_velocity
+		total_energy_out = total_power
+		total_energy_out = total_energy_out / 3600
+		total_energy_out = total_energy_out / 1000
+
+		print (f"Power out: {total_energy_out / constants.MOTOR_EFFICIENCY:.4f}, ", end="")
+		print (f"Power in:  {self.power_in(times):.4f}, {sum(times):.2f}")
+		# self.section_time = sum(times)
+
+		# self.end_position = constants.TRACK_LENGTH / self.track_section + self.start_position
+
+		# if len(velocities) != 0:
+		# 	self.average_velocity = sum(velocities) / len(velocities)
+		# 	self.end_velocity = velocities[-1]
+		# else:
+		# 	self.average_velocity = self.start_velocity
+		# 	self.end_velocity = self.start_velocity
 
 
-		power_used = (self.power_in(times) - self.power_out(accelerations, velocities, times)) / constants.BATTERY_CAPACITY
-		print (f"{self.power_in(times):.4f}, {power_used:.4f}, {sum(times):.2f}")
+		# power_used = (self.power_in(times) - self.power_out(accelerations, velocities, times)) / constants.BATTERY_CAPACITY
+		# print (f"{self.power_in(times):.4f}, {power_used:.4f}, {sum(times):.2f}")
 
-		self.end_percentage = (constants.BATTERY_CAPACITY * self.start_percentage +
-			self.power_in(times) -
-			(self.power_out(accelerations, velocities, times))
-			) / constants.BATTERY_CAPACITY
-		
-
-		# if (self.section_time / self.t < 1 and self.section_percent / power_used > 1):
-		# 	# THIS TELLS ME THAT BOTH TIME AND POWER CAN HANDLE MORE LAPS OR CAN GO FASTER
-		# 	print ("MORE LAPS")
-		# 	# print ("USED, ALLOTED")
-		# 	# print (f"{self.section_time:.2f}, {self.t:.2f}")
-		# 	# print (f"{power_used:.2%}, {self.section_percent:.2%}")
-
-		# if (self.section_time / self.t > 1 or self.section_percent / power_used < 1):
-		# 	# THIS TELLS ME THAT I CANNOT HANDLE THIS NUMBER OF LAPS OR NEEDS TO GO SLOWER
-		# 	print ("LESS LAPS")
-		# 	print ("USED, ALLOTED")
-		# 	print (f"{self.section_time:.2f}, {self.t:.2f}")
-		# 	print (f"{power_used:.2%}, {self.section_percent:.2%}")
+		# self.end_percentage = (constants.BATTERY_CAPACITY * self.start_percentage +
+		# 	self.power_in(times) -
+		# 	(self.power_out(accelerations, velocities, times))
+		# 	) / constants.BATTERY_CAPACITY
 
 	def power_in(self, times):
 		# SUN CALCULATIONS OVER A GIVEN PERIOD OF TIME
@@ -125,3 +118,9 @@ class Node:
 		# kW * hrs
 		self.section_power_out = energy / 1000
 		return (energy / 1000) / constants.MOTOR_EFFICIENCY
+
+def crr_force(v):
+	return constants.COEFFICIENT_ROLLING_RESISTANCE * (1 + (v * 3.6) / 161) * constants.WEIGHT
+
+def drag_force(v):
+	return (0.0451) * ((v * 3.6) ** 2) * constants.FRONTAL_AREA * constants.COEFFICIENT_DRAG

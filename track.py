@@ -29,7 +29,7 @@ class Track:
             
             battery_i = lap.get_b_f()
             time_driven  += lap.get_time()
-            lap.print_lap_stats()
+            # lap.print_lap_stats()
             laps.append(lap)
 
         self.battery_used = self.b_i - battery_i
