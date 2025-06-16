@@ -3,18 +3,20 @@ import constants
 import datetime
 
 class Node_List:
-	def __init__(self, velocity_i, start_percent, total_duration, total_perecent, time_of_day, location):
+	def __init__(self, target_v, velocity_i, start_percent, total_duration, total_perecent, time_of_day, location):
 		self.velocity_i = velocity_i
 		self.start_percent = start_percent
 		self.time_of_day = time_of_day
 		self.location = location
 		self.total_duration = total_duration
 		self.total_percent = total_perecent
+		self.target_v = target_v
 		self.generate_list()
 
 	def generate_list(self):
 		self.nodes = []
 		self.nodes.append(Node(
+			self.target_v,
 			self.time_of_day,
 			self.velocity_i,
 			0,
@@ -25,6 +27,7 @@ class Node_List:
 			)
 		for i in range(constants.SECTIONS - 1):
 			self.nodes.append(Node(
+				self.nodes[-1].target_v,
 				self.time_of_day + datetime.timedelta(seconds=self.nodes[-1].section_time),
 				self.nodes[-1].end_velocity,
 				self.nodes[-1].end_position,
@@ -55,7 +58,7 @@ class Node_List:
 	def print_nodes(self):
 		for node in self.nodes:
 			print (f"Battery:           {node.start_percentage * constants.BATTERY_CAPACITY:.2f}, {node.end_percentage * constants.BATTERY_CAPACITY:.2f}")
-			print (f"Power_Used:        {(1 - node.end_percentage / node.start_percentage) * constants.BATTERY_CAPACITY:.2f} W")
+			print (f"Power_Used:        {self.get_battery_used() * 1000:.2f} W * hrs")
 			print (f"Section_Time:      {node.section_time / 60:.2f} minutes")
 			print (f"End_Velocity:      {node.end_velocity:.2f} m/s")
 			print (f"Average_Velocity:  {node.average_velocity:.2f} m/s")
