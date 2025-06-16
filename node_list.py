@@ -34,6 +34,12 @@ class Node_List:
 				self.total_percent)
 			)
 
+	def get_battery_used(self):
+		total_battery_used = 0
+		for node in self.nodes:
+			total_battery_used += (node.start_percentage - node.end_percentage)
+		return total_battery_used
+
 	def get_v_f(self):
 		return self.nodes[-1].end_velocity
 
@@ -65,11 +71,12 @@ class Node_List:
 			power_in   += node.section_power_in
 			power_out  += node.section_power_out
 			average_velocity.append(node.average_velocity)
+		average_velocity = sum(average_velocity) / len(average_velocity)
 		print ("===========================================")
 		print (f"Total_Lap_Time:   {track_time:.2f} minutes")
 		print (f"Start_Percentage: {self.nodes[0].start_percentage:.2%}")
-		print (f"Average_Velocity: {sum(average_velocity) / len(average_velocity)}")
+		print (f"Average_Velocity: {average_velocity:.2f} m/s {average_velocity * 2.237:.2f} mph")
 		print (f"End_Percentage:   {self.get_b_f():.2%}")
-		print (f"Total_Power_In:   {power_in:.4f} kW")
-		print (f"Total_Power_Out:  {power_out:.4f} kW")
+		print (f"Total_Power_In:   {power_in:.4f} kW * hrs")
+		print (f"Total_Power_Out:  {power_out:.4f} kW * hrs")
 		print ("===========================================")

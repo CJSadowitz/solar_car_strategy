@@ -62,7 +62,7 @@ class Node:
 		self.section_time = sum(times)
 
 	def power_in(self, times):
-		# SUN CALCULATIONS OVER A GIVEN PERIOD OF TIME
+		# Adjust this for different efficiency values
 		city = self.location
 		time_now = self.time
 		power_in = 0
