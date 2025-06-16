@@ -22,3 +22,5 @@ TRACK_LENGTH                   = 5069.434       # m
 BATTERY_TIME_TOLERANCE         = 0.01
 SECTIONS                       = 100
 
+DRIVER_COUNT                   = 4
+

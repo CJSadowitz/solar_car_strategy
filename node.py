@@ -82,10 +82,6 @@ class Node:
 			power = constants.MAX_PANEL_POWER * math.cos(math.radians(solar_altitude))
 			# kW * s
 			power_in += power * t
-		# GRAVITY
-		gravity = 0
-		# REGEN
-		regen = 0
 
 		# kW * hrs
 		# print (f"POWER  IN: {power / 3600:.4f}")
