@@ -25,11 +25,11 @@ class Track:
             while True:
                 lap = self.generate_lap(target_v, velocity_i, battery_i)
                 ratio = abs((lap.get_battery_used() / (self.b_i - self.b_f)) / (lap.get_time() / self.duration))
-                if (ratio < 1.2 and ratio > 0.8):
+                if (ratio < 1.03 and ratio > 0.97):
                     print ("good:", ratio, target_v)
                     break
 
-                if (ratio > 1.2):
+                if (ratio > 1.03):
                     # Battery Ratio is bigger than time ratio (battery is the problem)
                     if (target_v != 0):
                         target_v -= 0.01
