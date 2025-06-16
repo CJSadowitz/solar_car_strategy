@@ -1,4 +1,3 @@
-from node_list import Node_List
 from track import Track
 from datetime import datetime
 from astral import LocationInfo

@@ -5,8 +5,7 @@ import constants
 
 # Every node is responsable for 5% of the track distance.
 class Node:
-	def __init__(self, sections, t, vi, pi, bi, location, section_duration, section_percent):
-		self.track_section    = sections
+	def __init__(self, t, vi, pi, bi, location, section_duration, section_percent):
 		self.start_velocity   = vi # m/s
 		self.end_velocity     = 0  # m/s
 		self.average_velocity = 0  # m/s
@@ -18,12 +17,10 @@ class Node:
 		self.time = t             # DATE
 		self.location = location  # OBJECT
 		# How much time and percent each section can use
-		self.t = section_duration
-		self.section_percent  = section_percent
+		self.t = section_duration / constants.SECTIONS
+		self.section_percent  = section_percent / constants.SECTIONS
 		
 		self.calc()
-		self.next_node = None
-
 
 	def calc(self):
 		vi = self.start_velocity
@@ -31,11 +28,13 @@ class Node:
 		vf = vi
 		total_energy = 0
 		times = []
-		for i in range(math.ceil(constants.TRACK_LENGTH / self.track_section)):
+		velocities = []
+		for i in range(math.ceil(constants.TRACK_LENGTH / constants.SECTIONS)):
 			if (vf >= constants.MAX_VELOCITY):
 				a = 0
 
 			vf = math.sqrt(vi ** 2 + 2 * a * 1)
+			velocities.append(vf)
 			t = ((2 * 1) / (vi + vf))
 			times.append(t)
 			# N * m
@@ -47,7 +46,6 @@ class Node:
 			total_energy += power * t
 			vi = vf
 
-		self.end_velocity = vf
 
 		total_energy_out = total_energy
 		# W * hrs
@@ -55,8 +53,13 @@ class Node:
 		# kW * hrs
 		total_energy_out = total_energy_out / 1000
 
-		print (f"Power out: {total_energy_out / constants.MOTOR_EFFICIENCY:.4f}, ", end="")
-		print (f"Power in:  {self.power_in(times):.4f}, {sum(times):.2f}")
+		# print (f"Power out: {total_energy_out / constants.MOTOR_EFFICIENCY:.4f}, ", end="")
+		# print (f"Power in:  {self.power_in(times):.4f}, {sum(times):.2f}")
+		self.end_velocity = vf
+		self.average_velocity = sum(velocities) / len(velocities)
+		self.section_power_out = total_energy_out / constants.MOTOR_EFFICIENCY
+		self.end_percentage =  (self.start_percentage * constants.BATTERY_CAPACITY - (total_energy_out / constants.MOTOR_EFFICIENCY) + self.power_in(times)) / constants.BATTERY_CAPACITY
+		self.section_time = sum(times)
 
 	def power_in(self, times):
 		# SUN CALCULATIONS OVER A GIVEN PERIOD OF TIME
