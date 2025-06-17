@@ -37,6 +37,8 @@ class Node:
 				a = (self.target_v ** 2 - vi ** 2) / 2 * 1
 				if (a <= constants.MIN_ACCELERATION):
 					a = constants.MIN_ACCELERATION
+				elif (a >= constants.MAX_ACCELERATION):
+					a = constants.MAX_ACCELERATION
 			
 			try:
 				vf = math.sqrt(vi ** 2 + 2 * a * 1)
@@ -62,8 +64,6 @@ class Node:
 		# kW * hrs
 		total_energy_out = total_energy_out / 1000
 
-		# print (f"Power out: {total_energy_out / constants.MOTOR_EFFICIENCY:.4f}, ", end="")
-		# print (f"Power in:  {self.power_in(times):.4f}, {sum(times):.2f}")
 		self.end_velocity = vf
 		self.average_velocity = sum(velocities) / len(velocities)
 		self.section_power_out = total_energy_out / constants.MOTOR_EFFICIENCY
