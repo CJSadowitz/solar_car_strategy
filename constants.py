@@ -1,5 +1,5 @@
 # Car Values
-MAX_VELOCITY                   = 15.0            # m/s 9.1
+MAX_VELOCITY                   = 15.0           # m/s 9.1
 BATTERY_CAPACITY               = 5.24           # kW * hrs
 MAX_PANEL_POWER                = 0.956          # kW
 MASS                           = 430            # kg
@@ -23,4 +23,4 @@ BATTERY_TIME_TOLERANCE         = 0.01
 SECTIONS                       = 100
 
 DRIVER_COUNT                   = 4
-
+DRIVER_CHANGE_TIME             = 300            # s

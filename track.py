@@ -24,7 +24,7 @@ class Track:
             if (battery_used >= self.b_i - self.b_f or time_driven >= self.duration):
                 break
             if math.floor(driver_time >= self.duration / constants.DRIVER_COUNT):
-                time_driven += 300 # Add 5 minutes for a driver change
+                time_driven += constants.DRIVER_CHANGE_TIME # Add 5 minutes for a driver change
                 velocity_i = 0
                 driver_time = 0
             lap = None
