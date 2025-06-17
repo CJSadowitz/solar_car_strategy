@@ -25,6 +25,7 @@ class Track:
                 break
             if math.floor(driver_time >= self.duration / constants.DRIVER_COUNT):
                 time_driven += 300 # Add 5 minutes for a driver change
+                velocity_i = 0
                 driver_time = 0
             lap = None
             while True:
@@ -39,10 +40,8 @@ class Track:
             battery_i     = lap.get_b_f()
             time_driven  += lap.get_time()
             driver_time  += lap.get_time()
-            # lap.print_nodes()
             if (battery_used >= self.b_i - self.b_f or time_driven >= self.duration):
                 break
-            # lap.print_lap_stats()
             laps.append(lap)
 
         self.battery_used = self.b_i - battery_i
