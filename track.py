@@ -56,7 +56,7 @@ class Track:
             # Battery Ratio is bigger than time ratio (battery is the problem)
             if (target_v != 0):
                 target_v -= 0.01
-                print ("Battery:", target_v)
+                print ("Battery:", target_v, ratio)
             else:
                 # Don't go negative speed
                 return target_v, True
@@ -64,7 +64,7 @@ class Track:
             # Time Ratio is bigger than battery ratio (time is the problem)
             if (target_v != constants.MAX_VELOCITY):
                 target_v += 0.01
-                print ("Time:", target_v)
+                print ("Time:", target_v, ratio)
             else:
                 # Don't go beyond max velocity
                 return target_v, True

@@ -14,8 +14,11 @@ class Node_List:
 		self.generate_list()
 
 	def generate_list(self):
+		# target_v is the average target velocity that the lap should attempt to obtain
+		# Each sections/node of the track should be attempted to be optimized as well
 		self.nodes = []
-		self.nodes.append(Node(
+		self.nodes.append(
+			Node(
 			self.target_v,
 			self.time_of_day,
 			self.velocity_i,
@@ -23,19 +26,24 @@ class Node_List:
 			self.start_percent,
 			self.location,
 			self.total_duration,
-			self.total_percent)
+			self.total_percent
 			)
+		)
 		for i in range(constants.SECTIONS - 1):
-			self.nodes.append(Node(
-				self.nodes[-1].target_v,
+			target_v = self.nodes[-1].target_v
+			new_node = Node(
+				target_v,
 				self.time_of_day + datetime.timedelta(seconds=self.nodes[-1].section_time),
 				self.nodes[-1].end_velocity,
 				self.nodes[-1].end_position,
 				self.nodes[-1].end_percentage,
 				self.location,
 				self.total_duration,
-				self.total_percent)
+				self.total_percent
 			)
+			self.nodes.append(new_node)
+
+
 
 	def get_battery_used(self):
 		total_battery_used = 0

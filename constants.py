@@ -11,8 +11,8 @@ COEFFICIENT_DRAG               = 0.3
 COEFFICIENT_ROLLING_RESISTANCE = 0.0055
 
 # Fudge
-MAX_ACCELERATION               = 0.2            # m/s^2
-MIN_ACCELERATION               = -0.2           # m/s^2
+MAX_ACCELERATION               =  0.6            # m/s^2
+MIN_ACCELERATION               = -0.6           # m/s^2
 PARASITIC_FACTOR               = 1.0            # %
 
 # Track Data
@@ -20,7 +20,7 @@ TRACK_LENGTH                   = 5069.434       # m
 
 # Code adjustments
 BATTERY_TIME_TOLERANCE         = 0.01
-SECTIONS                       = 100
+SECTIONS                       = 5
 
 DRIVER_COUNT                   = 4
 DRIVER_CHANGE_TIME             = 300            # s

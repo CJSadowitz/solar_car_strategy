@@ -18,9 +18,10 @@ class Node:
 		self.end_percentage   = 0
 		self.time = t             # DATE
 		self.location = location  # OBJECT
+
 		# How much time and percent each section can use
-		self.t = section_duration / constants.SECTIONS
-		self.section_percent  = section_percent / constants.SECTIONS
+		self.t   = section_duration / constants.SECTIONS
+		self.sp  = section_percent  / constants.SECTIONS
 		
 		self.elevation_dict = get_track_edge("side_l.csv")
 
@@ -35,56 +36,58 @@ class Node:
 		velocities = []
 		self.gravity_power = 0
 		x = 1
+		# Iterate through each meter of the designated section
 		for i in range(math.ceil(constants.TRACK_LENGTH / constants.SECTIONS)):
-			if (vf >= constants.MAX_VELOCITY):
-				a = 0
-			else:
-				a = (self.target_v ** 2 - vi ** 2) / 2 * x
-				if (a <= constants.MIN_ACCELERATION):
-					a = constants.MIN_ACCELERATION
-				elif (a >= constants.MAX_ACCELERATION):
-					a = constants.MAX_ACCELERATION
-			
-			try:
-				vf = math.sqrt(vi ** 2 + 2 * a * x)
-			except ValueError:
-				print (f"A, How:\nB, {vi ** 2 + 2 * a * x}, {vi}, {a}")
-
-			velocities.append(vf)
-			t = ((2 * x) / (vi + vf))
-			times.append(t)
-
-			# Change in gravity
-			gravity_work = constants.MASS * constants.GRAVITY * (get_elevation(
-					(self.end_position + x) / constants.TRACK_LENGTH, self.elevation_dict
-					) - get_elevation(
-						self.end_position / constants.TRACK_LENGTH, self.elevation_dict
-						)
-				)
-			self.gravity_power += gravity_work / 3600
-			# N * m
-			delta_work = (0.5 * constants.MASS * vf ** 2) - (0.5 * constants.MASS * vi ** 2)
-			sum_work = delta_work + (crr_force(vf) + drag_force(vf)) * x + gravity_work
+			a = self.calculate_acceleration(vf, vi, x)
+			vf = math.sqrt(vi ** 2 + 2 * a * x)
+			t = ((2 * x) / (vi + vf))			
+			sum_work = self.calculate_work(vf, vi, x)
 			# W
-			power = sum_work / t + constants.PARASITIC_FACTOR * 30
-			# W * s
-			total_energy += power * t
+			total_energy += (sum_work / t + constants.PARASITIC_FACTOR * 30) * t
+
 			vi = vf
 			self.end_position += x
+			velocities.append(vf)
+			times.append(t)
 
+		self.calculate_energy(total_energy, times)
+
+		self.end_velocity = vf
+		self.average_velocity = sum(velocities) / len(velocities)
+		self.section_time = sum(times)
+	
+	def calculate_energy(self, total_energy, times):
 		total_energy_out = total_energy
 		# W * hrs
 		total_energy_out = total_energy_out / 3600
 		# kW * hrs
 		total_energy_out = total_energy_out / 1000
-
-		self.end_velocity = vf
-		self.average_velocity = sum(velocities) / len(velocities)
 		self.section_power_out = total_energy_out / constants.MOTOR_EFFICIENCY
 		self.end_percentage =  (
 			self.start_percentage * constants.BATTERY_CAPACITY - (total_energy_out / constants.MOTOR_EFFICIENCY) + self.power_in(times)
 			) / constants.BATTERY_CAPACITY
-		self.section_time = sum(times)
+
+	def calculate_work(self, vf, vi, x):
+		# Change in gravity
+		gravity_work = constants.MASS * constants.GRAVITY * (get_elevation(
+			(self.end_position + x) / constants.TRACK_LENGTH, self.elevation_dict) - 
+			get_elevation(self.end_position / constants.TRACK_LENGTH, self.elevation_dict)
+		)
+		# N * m
+		delta_work = (0.5 * constants.MASS * vf ** 2) - (0.5 * constants.MASS * vi ** 2)
+		sum_work = delta_work + (crr_force(vf) + drag_force(vf)) * x + gravity_work
+		return sum_work
+
+	def calculate_acceleration(self, vf, vi, x):
+		if (vf >= constants.MAX_VELOCITY):
+			a = 0
+		else:
+			a = (self.target_v ** 2 - vi ** 2) / 2 * x
+			if (a <= constants.MIN_ACCELERATION):
+				a = constants.MIN_ACCELERATION
+			elif (a >= constants.MAX_ACCELERATION):
+				a = constants.MAX_ACCELERATION
+		return a
 
 	def power_in(self, times):
 		# Adjust this for different efficiency values
