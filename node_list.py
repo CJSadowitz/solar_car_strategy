@@ -56,13 +56,19 @@ class Node_List:
 		return lap_time
 
 	def print_nodes(self):
+		i = 1
 		for node in self.nodes:
+			print ("===========================================")
+			print (i)
 			print (f"Battery:           {node.start_percentage * constants.BATTERY_CAPACITY:.2f}, {node.end_percentage * constants.BATTERY_CAPACITY:.2f}")
 			print (f"Power_Used:        {self.get_battery_used() * 1000:.2f} W * hrs")
-			print (f"Section_Time:      {node.section_time / 60:.2f} minutes")
-			print (f"End_Velocity:      {node.end_velocity:.2f} m/s")
+			print (f"Section_Time:      {node.section_time:.2f} seconds")
+			print (f"Start_Velocity:    {node.start_velocity:.2f} m/s {node.start_velocity * 2.237:.2f} mph")
+			print (f"End_Velocity:      {node.end_velocity:.2f} m/s {node.end_velocity * 2.237:.2f} mph")
 			print (f"Average_Velocity:  {node.average_velocity:.2f} m/s")
 			print (f"Distance_Traveled: {node.end_position - node.start_position:.2f} m")
+			print ("===========================================")
+			i += 1
 
 	def print_lap_stats(self):
 		track_time = 0
