@@ -18,7 +18,7 @@ class Track:
         battery_used = 0
         battery_i = self.b_i
         velocity_i = 0
-        target_v = constants.MAX_VELOCITY - 2
+        target_v = constants.MAX_VELOCITY - 2 + 0.4
         driver_time = 0
         while True:
             if (battery_used >= self.b_i - self.b_f or time_driven >= self.duration):
@@ -42,23 +42,21 @@ class Track:
             driver_time  += lap.get_time()
             if (battery_used >= self.b_i - self.b_f or time_driven >= self.duration):
                 break
+            lap.print_nodes()
             laps.append(lap)
 
         self.battery_used = self.b_i - battery_i
         self.laps = laps
 
-        print (f"{time_driven / 3600:.2f} hours")
-        print (f"{battery_used * constants.BATTERY_CAPACITY:.4}")
-
     def check_time_charge_ratio(self, ratio, target_v):
         if (ratio < 1 + constants.BATTERY_TIME_TOLERANCE and ratio > 1 - constants.BATTERY_TIME_TOLERANCE):
-            # print ("good:", ratio, target_v)
+            print ("Yay")
             return target_v, True
         if (ratio > 1 + constants.BATTERY_TIME_TOLERANCE):
             # Battery Ratio is bigger than time ratio (battery is the problem)
             if (target_v != 0):
                 target_v -= 0.01
-                # print (f"battery, {target_v:.2f}, {ratio:.5f}")
+                print ("Battery:", target_v)
             else:
                 # Don't go negative speed
                 return target_v, True
@@ -66,7 +64,7 @@ class Track:
             # Time Ratio is bigger than battery ratio (time is the problem)
             if (target_v != constants.MAX_VELOCITY):
                 target_v += 0.01
-                # print (f"time, {target_v:.2f}, {ratio:.5f}")
+                print ("Time:", target_v)
             else:
                 # Don't go beyond max velocity
                 return target_v, True

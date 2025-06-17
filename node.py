@@ -1,4 +1,5 @@
 from astral.sun import elevation
+from track_reader import get_elevation, get_track_edge
 import datetime
 import math
 import constants
@@ -21,6 +22,8 @@ class Node:
 		self.t = section_duration / constants.SECTIONS
 		self.section_percent  = section_percent / constants.SECTIONS
 		
+		self.elevation_dict = get_track_edge("side_l.csv")
+
 		self.calc()
 
 	def calc(self):
@@ -30,33 +33,44 @@ class Node:
 		total_energy = 0
 		times = []
 		velocities = []
+		self.gravity_power = 0
+		x = 1
 		for i in range(math.ceil(constants.TRACK_LENGTH / constants.SECTIONS)):
 			if (vf >= constants.MAX_VELOCITY):
 				a = 0
 			else:
-				a = (self.target_v ** 2 - vi ** 2) / 2 * 1
+				a = (self.target_v ** 2 - vi ** 2) / 2 * x
 				if (a <= constants.MIN_ACCELERATION):
 					a = constants.MIN_ACCELERATION
 				elif (a >= constants.MAX_ACCELERATION):
 					a = constants.MAX_ACCELERATION
 			
 			try:
-				vf = math.sqrt(vi ** 2 + 2 * a * 1)
+				vf = math.sqrt(vi ** 2 + 2 * a * x)
 			except ValueError:
-				print (f"A, How:\nB, {vi ** 2 + 2 * a * 1}, {vi}, {a}")
+				print (f"A, How:\nB, {vi ** 2 + 2 * a * x}, {vi}, {a}")
 
 			velocities.append(vf)
-			t = ((2 * 1) / (vi + vf))
+			t = ((2 * x) / (vi + vf))
 			times.append(t)
+
+			# Change in gravity
+			gravity_work = constants.MASS * constants.GRAVITY * (get_elevation(
+					(self.end_position + x) / constants.TRACK_LENGTH, self.elevation_dict
+					) - get_elevation(
+						self.end_position / constants.TRACK_LENGTH, self.elevation_dict
+						)
+				)
+			self.gravity_power += gravity_work / 3600
 			# N * m
 			delta_work = (0.5 * constants.MASS * vf ** 2) - (0.5 * constants.MASS * vi ** 2)
-			sum_work = delta_work + (crr_force(vf) + drag_force(vf)) * 1
+			sum_work = delta_work + (crr_force(vf) + drag_force(vf)) * x + gravity_work
 			# W
 			power = sum_work / t + constants.PARASITIC_FACTOR * 30
 			# W * s
 			total_energy += power * t
 			vi = vf
-
+			self.end_position += x
 
 		total_energy_out = total_energy
 		# W * hrs
@@ -67,7 +81,9 @@ class Node:
 		self.end_velocity = vf
 		self.average_velocity = sum(velocities) / len(velocities)
 		self.section_power_out = total_energy_out / constants.MOTOR_EFFICIENCY
-		self.end_percentage =  (self.start_percentage * constants.BATTERY_CAPACITY - (total_energy_out / constants.MOTOR_EFFICIENCY) + self.power_in(times)) / constants.BATTERY_CAPACITY
+		self.end_percentage =  (
+			self.start_percentage * constants.BATTERY_CAPACITY - (total_energy_out / constants.MOTOR_EFFICIENCY) + self.power_in(times)
+			) / constants.BATTERY_CAPACITY
 		self.section_time = sum(times)
 
 	def power_in(self, times):
