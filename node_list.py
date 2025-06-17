@@ -43,8 +43,6 @@ class Node_List:
 			)
 			self.nodes.append(new_node)
 
-
-
 	def get_battery_used(self):
 		total_battery_used = 0
 		for node in self.nodes:

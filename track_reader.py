@@ -6,6 +6,7 @@ def get_track_edge(path):
             elevation = values[2]
             relative_pos = values[3]
             pos_elv_dict[float(relative_pos.strip())] = float(elevation)
+    file.close()
     
     return pos_elv_dict
 

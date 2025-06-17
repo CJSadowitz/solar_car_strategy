@@ -42,7 +42,7 @@ class Track:
             driver_time  += lap.get_time()
             if (battery_used >= self.b_i - self.b_f or time_driven >= self.duration):
                 break
-            lap.print_nodes()
+            lap.print_lap_stats()
             laps.append(lap)
 
         self.battery_used = self.b_i - battery_i

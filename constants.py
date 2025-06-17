@@ -20,7 +20,7 @@ TRACK_LENGTH                   = 5069.434       # m
 
 # Code adjustments
 BATTERY_TIME_TOLERANCE         = 0.01
-SECTIONS                       = 5
+SECTIONS                       = 100
 
 DRIVER_COUNT                   = 4
 DRIVER_CHANGE_TIME             = 300            # s
