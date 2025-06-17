@@ -1,3 +1,5 @@
+import bisect
+
 def get_track_edge(path):
     pos_elv_dict = {}
     with open(path, "r") as file:
@@ -11,5 +13,16 @@ def get_track_edge(path):
     return pos_elv_dict
 
 def get_elevation(relative_position, dict):
-    closest_key = min(dict.keys(), key=lambda k: abs(k - relative_position))
+    keys = list(dict.keys())
+    idx = bisect.bisect_left(keys, relative_position)
+
+    if idx == 0:
+        closest_key = keys[0]
+    elif idx == len(keys):
+        closest_key = keys[-1]
+    else:
+        before = keys[idx - 1]
+        after = keys[idx]
+        closest_key = before if abs(relative_position - before) < abs(relative_position - after) else after
+
     return dict[closest_key]

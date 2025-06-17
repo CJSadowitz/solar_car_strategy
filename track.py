@@ -28,6 +28,7 @@ class Track:
                 velocity_i = 0
                 driver_time = 0
             lap = None
+            # Brute force check 
             while True:
                 lap = self.generate_lap(target_v, velocity_i, battery_i)
                 ratio = abs((lap.get_battery_used() / (self.b_i - self.b_f)) / (lap.get_time() / self.duration))
@@ -55,7 +56,10 @@ class Track:
         if (ratio > 1 + constants.BATTERY_TIME_TOLERANCE):
             # Battery Ratio is bigger than time ratio (battery is the problem)
             if (target_v != 0):
-                target_v -= 0.01
+                if (ratio - 1 > 0.1):
+                    target_v -= 0.1
+                else:
+                    target_v -= 0.01
                 print ("Battery:", target_v, ratio)
             else:
                 # Don't go negative speed
@@ -63,7 +67,10 @@ class Track:
         else:
             # Time Ratio is bigger than battery ratio (time is the problem)
             if (target_v != constants.MAX_VELOCITY):
-                target_v += 0.01
+                if (ratio - 1 < -0.1):
+                    target_v += 0.1
+                else:
+                    target_v += 0.01
                 print ("Time:", target_v, ratio)
             else:
                 # Don't go beyond max velocity
