@@ -53,13 +53,11 @@ class Track:
         if (ratio < 1 + constants.BATTERY_TIME_TOLERANCE and ratio > 1 - constants.BATTERY_TIME_TOLERANCE):
             print ("Yay")
             return target_v, True
+        rmse =  math.sqrt(math.pow((1 - ratio), 2))
         if (ratio > 1 + constants.BATTERY_TIME_TOLERANCE):
             # Battery Ratio is bigger than time ratio (battery is the problem)
             if (target_v != 0):
-                if (ratio - 1 > 0.1):
-                    target_v -= 0.1
-                else:
-                    target_v -= 0.01
+                target_v -= rmse
                 print ("Battery:", target_v, ratio)
             else:
                 # Don't go negative speed
@@ -67,10 +65,7 @@ class Track:
         else:
             # Time Ratio is bigger than battery ratio (time is the problem)
             if (target_v != constants.MAX_VELOCITY):
-                if (ratio - 1 < -0.1):
-                    target_v += 0.1
-                else:
-                    target_v += 0.01
+                target_v += rmse
                 print ("Time:", target_v, ratio)
             else:
                 # Don't go beyond max velocity
