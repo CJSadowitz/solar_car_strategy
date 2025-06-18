@@ -1,5 +1,5 @@
 from astral.sun import elevation
-from track_reader import get_elevation, get_track_edge
+from track_reader import get_elevation
 import datetime
 import math
 import constants
@@ -7,7 +7,7 @@ import numpy as np
 
 # Every node is responsable for 5% of the track distance.
 class Node:
-	def __init__(self, target_v, t, vi, pi, bi, location, section_duration, section_percent):
+	def __init__(self, target_v, t, vi, pi, bi, location, section_duration, section_percent, elevation_dict):
 		self.target_v = target_v
 		self.start_velocity   = vi # m/s
 		self.end_velocity     = 0  # m/s
@@ -24,7 +24,7 @@ class Node:
 		self.t   = section_duration / constants.SECTIONS
 		self.sp  = section_percent  / constants.SECTIONS
 		
-		self.elevation_dict = get_track_edge("side_l.csv")
+		self.elevation_dict = elevation_dict
 
 		self.calc()
 
@@ -50,16 +50,14 @@ class Node:
 			pos += x
 			vi = vf
 
-		self.end_position = poss[-1]
-
 		sum_work = self.calculate_work(vfs, vis, poss, x)
 		t = np.array(times)
 		# W * s
 		total_energy = np.sum((sum_work / t + constants.PARASITIC_FACTOR * 30) * t)
-
 		self.calculate_energy(total_energy, times)
 
 		self.end_velocity = vf
+		self.end_position = poss[-1]
 		self.average_velocity = sum(vfs) / len(vfs)
 		self.section_time = sum(times)
 	

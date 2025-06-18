@@ -1,4 +1,5 @@
 from node_list import Node_List
+from track_reader import get_track_edge
 import constants
 import math
 
@@ -10,6 +11,7 @@ class Track:
         self.b_i = b_i
         self.b_f = b_f
         self.duration = duration
+        self.dict = get_track_edge("side_l.csv")
 
     def get_day_info(self):
         # Some laps will be more constant, currently starting from stop for every lap
@@ -81,6 +83,7 @@ class Track:
             (self.b_i - self.b_f),
             self.day,
             self.loc,
+            self.dict
             )
         return lap
 

@@ -3,7 +3,7 @@ import constants
 import datetime
 
 class Node_List:
-	def __init__(self, target_v, velocity_i, start_percent, total_duration, total_perecent, time_of_day, location):
+	def __init__(self, target_v, velocity_i, start_percent, total_duration, total_perecent, time_of_day, location, elevation_dict):
 		self.velocity_i = velocity_i
 		self.start_percent = start_percent
 		self.time_of_day = time_of_day
@@ -11,6 +11,7 @@ class Node_List:
 		self.total_duration = total_duration
 		self.total_percent = total_perecent
 		self.target_v = target_v
+		self.dict=  elevation_dict
 		self.generate_list()
 
 	def generate_list(self):
@@ -26,7 +27,8 @@ class Node_List:
 			self.start_percent,
 			self.location,
 			self.total_duration,
-			self.total_percent
+			self.total_percent,
+			self.dict
 			)
 		)
 		for i in range(constants.SECTIONS - 1):
@@ -39,7 +41,8 @@ class Node_List:
 				self.nodes[-1].end_percentage,
 				self.location,
 				self.total_duration,
-				self.total_percent
+				self.total_percent,
+				self.dict
 			)
 			self.nodes.append(new_node)
 
