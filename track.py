@@ -1,5 +1,4 @@
 from node_list import Node_List
-from track_reader import get_track_edge
 import constants
 import math
 
@@ -80,8 +79,6 @@ class Track:
             target_v,
             velocity_i,
             battery_i,
-            self.duration,
-            (self.b_i - self.b_f),
             self.day,
             self.loc,
             self.e_list

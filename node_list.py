@@ -3,13 +3,11 @@ import constants
 import datetime
 
 class Node_List:
-	def __init__(self, target_v, velocity_i, start_percent, total_duration, total_perecent, time_of_day, location, elevation_list):
+	def __init__(self, target_v, velocity_i, start_percent, time_of_day, location, elevation_list):
 		self.velocity_i = velocity_i
 		self.start_percent = start_percent
 		self.time_of_day = time_of_day
 		self.location = location
-		self.total_duration = total_duration
-		self.total_percent = total_perecent
 		self.target_v = target_v
 		self.e_list = elevation_list
 		self.generate_list()
@@ -24,22 +22,17 @@ class Node_List:
 			0,
 			self.start_percent,
 			self.location,
-			self.total_duration,
-			self.total_percent,
 			self.e_list
 			)
 		)
 		for i in range(constants.SECTIONS - 1):
-			target_v = nodes[-1].target_v
 			new_node = Node(
-				target_v,
+				nodes[-1].target_v,
 				self.time_of_day + datetime.timedelta(seconds=nodes[-1].section_time),
 				nodes[-1].end_velocity,
 				nodes[-1].end_position,
 				nodes[-1].end_percentage,
 				self.location,
-				self.total_duration,
-				self.total_percent,
 				self.e_list
 			)
 			nodes.append(new_node)
@@ -66,17 +59,19 @@ class Node_List:
 	def print_nodes(self):
 		i = 1
 		for node in self.nodes:
-			print ("===========================================")
-			print (i)
-			print (f"Battery:           {node.start_percentage * constants.BATTERY_CAPACITY:.2f}, {node.end_percentage * constants.BATTERY_CAPACITY:.2f}")
-			print (f"Power_Used:        {self.get_battery_used() * 1000:.2f} W * hrs")
-			print (f"Gravity_Power:     {node.gravity_power:.4f} W * hrs")
-			print (f"Section_Time:      {node.section_time:.2f} seconds")
-			print (f"Start_Velocity:    {node.start_velocity:.2f} m/s {node.start_velocity * 2.237:.2f} mph")
-			print (f"End_Velocity:      {node.end_velocity:.2f} m/s {node.end_velocity * 2.237:.2f} mph")
-			print (f"Average_Velocity:  {node.average_velocity:.2f} m/s")
-			print (f"Distance_Traveled: {node.end_position - node.start_position:.2f} m")
-			print ("===========================================")
+			print(f"""
+			===========================================
+			Iteration:         {i}
+			Battery:          {node.start_percentage * constants.BATTERY_CAPACITY:.2f}, {node.end_percentage * constants.BATTERY_CAPACITY:.2f}
+			Power_Used:       {self.get_battery_used() * 1000:.2f} W * hrs
+			Gravity_Power:    {node.gravity_power:.4f} W * hrs
+			Section_Time:     {node.section_time:.2f} seconds
+			Start_Velocity:   {node.start_velocity:.2f} m/s {node.start_velocity * 2.237:.2f} mph
+			End_Velocity:     {node.end_velocity:.2f} m/s {node.end_velocity * 2.237:.2f} mph
+			Average_Velocity: {node.average_velocity:.2f} m/s
+			Distance_Traveled:{node.end_position - node.start_position:.2f} m
+			===========================================
+			""")
 			i += 1
 
 	def print_lap_stats(self):
@@ -90,11 +85,14 @@ class Node_List:
 			power_out  += node.section_power_out
 			average_velocity.append(node.end_velocity)
 		average_velocity = sum(average_velocity) / len(average_velocity)
-		print ("===========================================")
-		print (f"Total_Lap_Time:   {track_time:.2f} minutes")
-		print (f"Start_Percentage: {self.nodes[0].start_percentage:.2%}")
-		print (f"Average_Velocity: {average_velocity:.2f} m/s {average_velocity * 2.237:.2f} mph")
-		print (f"End_Percentage:   {self.get_b_f():.2%}")
-		print (f"Total_Power_In:   {power_in:.4f} kW * hrs")
-		print (f"Total_Power_Out:  {power_out:.4f} kW * hrs")
-		print ("===========================================")
+		print(f"""
+		===========================================
+		Total_Lap_Time:   {track_time:.2f} minutes
+		Start_Percentage: {self.nodes[0].start_percentage:.2%}
+		Average_Velocity: {average_velocity:.2f} m/s {average_velocity * 2.237:.2f} mph
+		End_Percentage:   {self.get_b_f():.2%}
+		Total_Power_In:   {power_in:.4f} kW * hrs
+		Total_Power_Out:  {power_out:.4f} kW * hrs
+		===========================================
+		""")
+
