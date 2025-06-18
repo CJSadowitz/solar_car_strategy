@@ -7,7 +7,7 @@ import numpy as np
 
 # Every node is responsable for 5% of the track distance.
 class Node:
-	def __init__(self, target_v, t, vi, pi, bi, location, section_duration, section_percent, elevation_dict):
+	def __init__(self, target_v, t, vi, pi, bi, location, section_duration, section_percent, elevation_list):
 		self.target_v = target_v
 		self.start_velocity   = vi # m/s
 		self.end_velocity     = 0  # m/s
@@ -24,7 +24,7 @@ class Node:
 		self.t   = section_duration / constants.SECTIONS
 		self.sp  = section_percent  / constants.SECTIONS
 		
-		self.elevation_dict = elevation_dict
+		self.e_list = elevation_list
 
 		self.calc()
 
@@ -52,6 +52,9 @@ class Node:
 
 		sum_work = self.calculate_work(vfs, vis, poss, x)
 		t = np.array(times)
+
+		self.gravity_power  = np.sum(self.gravity_work * t)
+
 		# W * s
 		total_energy = np.sum((sum_work / t + constants.PARASITIC_FACTOR * 30) * t)
 		self.calculate_energy(total_energy, times)
@@ -77,16 +80,16 @@ class Node:
 		vf  = np.array(vf_array)
 		vi  = np.array(vi_array)
 		pos = np.array(pos_array)
+		elv = np.array(self.e_list)
 
 		# Change in gravity (vectorized)
 		gravity_work = constants.MASS * constants.GRAVITY * (
-			np.array(list(map(lambda p: get_elevation(p / constants.TRACK_LENGTH, self.elevation_dict), (pos + x) / constants.TRACK_LENGTH))) -
-			np.array(list(map(lambda p: get_elevation(p / constants.TRACK_LENGTH, self.elevation_dict), pos / constants.TRACK_LENGTH)))
+			elv[(pos).astype(int)] - elv[(pos + x).astype(int)]
 		)
 
-		self.gravity_power = gravity_work # FIX THIS LATER COLIN
+		self.gravity_work = gravity_work
 
-		delta_work = (0.5 * constants.MASS * vf ** 2) - (0.5 * constants.MASS * vi ** 2)
+		delta_work = (0.5 * constants.MASS * np.square(vf)) - (0.5 * constants.MASS * np.square(vi))
 
 		sum_work = delta_work + (crr_force(vf) + drag_force(vf)) * x + gravity_work
 

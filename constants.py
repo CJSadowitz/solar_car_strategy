@@ -16,7 +16,7 @@ MIN_ACCELERATION               = -0.6           # m/s^2
 PARASITIC_FACTOR               = 1.0            # %
 
 # Track Data
-TRACK_LENGTH                   = 5069.434       # m
+TRACK_LENGTH                   = 5069      # m
 
 # Code adjustments
 BATTERY_TIME_TOLERANCE         = 0.01          # The smaller the more accurate; the more time required, 0.01 should be accurate enoguh

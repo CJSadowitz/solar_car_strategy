@@ -4,14 +4,14 @@ import constants
 import math
 
 class Track:
-    def __init__(self, location, day, driver_count, b_i, b_f, duration):
+    def __init__(self, location, day, driver_count, b_i, b_f, duration, elevation_list):
         self.loc = location
         self.day = day
         self.count = driver_count
         self.b_i = b_i
         self.b_f = b_f
         self.duration = duration
-        self.dict = get_track_edge("side_l.csv")
+        self.e_list = elevation_list
 
     def get_day_info(self):
         # Some laps will be more constant, currently starting from stop for every lap
@@ -20,7 +20,7 @@ class Track:
         battery_used = 0
         battery_i = self.b_i
         velocity_i = 0
-        target_v = constants.MAX_VELOCITY - 2 + 0.4
+        target_v = constants.MAX_VELOCITY
         driver_time = 0
         while True:
             if (battery_used >= self.b_i - self.b_f or time_driven >= self.duration):
@@ -46,6 +46,7 @@ class Track:
             if (battery_used >= self.b_i - self.b_f or time_driven >= self.duration):
                 break
             lap.print_lap_stats()
+            # lap.print_nodes()
             laps.append(lap)
 
         self.battery_used = self.b_i - battery_i
@@ -83,7 +84,7 @@ class Track:
             (self.b_i - self.b_f),
             self.day,
             self.loc,
-            self.dict
+            self.e_list
             )
         return lap
 

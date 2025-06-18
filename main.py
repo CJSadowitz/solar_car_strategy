@@ -2,19 +2,28 @@ from track import Track
 from datetime import datetime
 from astral import LocationInfo
 from solar_charge import charge_off_hour
+from track_reader import get_track_edge, get_elevation
 import constants
+import cProfile
+import numpy as np
 
 def main():
 	location = LocationInfo("Bowling Green", "USA", "America/Chicago", 36.97, -86.43)
 
 	laps = 0
 
+	# Precomute Elevation data
+	e_dict = get_track_edge("side_l.csv")
+	pos = list(range(0, 5069))  # Creates a list from 0 to 5068
+	elevation_list = np.array(list(map(lambda p: get_elevation(p / constants.TRACK_LENGTH, e_dict), pos)))
+
 	# July 3, 2025, 10:00 AM CT
 	start_time = datetime(2025, 7, 3, 10, 0)
 	battery_initial = 1.00
 	battery_final   = 0.66
-	day_1 = Track(location, start_time, 4, battery_initial, battery_final, 28800)
-	day_1.get_day_info()
+	day_1 = Track(location, start_time, 4, battery_initial, battery_final, 28800, elevation_list)
+	cProfile.runctx('day_1.get_day_info()', globals(), locals())
+	# day_1.get_day_info()
 	# day_1.laps[0].print_nodes()
 	laps += day_1.get_laps()
 	# print (day_1.get_laps(), "laps")
