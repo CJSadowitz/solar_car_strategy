@@ -53,7 +53,7 @@ class Track:
         if (ratio < 1 + constants.BATTERY_TIME_TOLERANCE and ratio > 1 - constants.BATTERY_TIME_TOLERANCE):
             print ("Yay")
             return target_v, True
-        rmse =  math.sqrt(math.pow((1 - ratio), 2))
+        rmse = abs((1 - ratio))
         if (ratio > 1 + constants.BATTERY_TIME_TOLERANCE):
             # Battery Ratio is bigger than time ratio (battery is the problem)
             if (target_v != 0):

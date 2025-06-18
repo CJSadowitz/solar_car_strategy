@@ -19,7 +19,7 @@ PARASITIC_FACTOR               = 1.0            # %
 TRACK_LENGTH                   = 5069.434       # m
 
 # Code adjustments
-BATTERY_TIME_TOLERANCE         = 0.01
+BATTERY_TIME_TOLERANCE         = 0.01          # The smaller the more accurate; the more time required, 0.01 should be accurate enoguh
 SECTIONS                       = 100
 
 DRIVER_COUNT                   = 4

@@ -3,6 +3,7 @@ from track_reader import get_elevation, get_track_edge
 import datetime
 import math
 import constants
+import numpy as np
 
 # Every node is responsable for 5% of the track distance.
 class Node:
@@ -31,29 +32,35 @@ class Node:
 		vi = self.start_velocity
 		a = constants.MAX_ACCELERATION
 		vf = vi
-		total_energy = 0
+		pos = self.start_position
 		times = []
-		velocities = []
-		self.gravity_power = 0
+		vis = []
+		vfs = []
+		poss = []
 		x = 1
 		# Iterate through each meter of the designated section
 		for i in range(math.ceil(constants.TRACK_LENGTH / constants.SECTIONS)):
 			a = self.calculate_acceleration(vf, vi, x)
-			vf = math.sqrt(vi ** 2 + 2 * a * x)
-			t = ((2 * x) / (vi + vf))			
-			sum_work = self.calculate_work(vf, vi, x)
-			# W
-			total_energy += (sum_work / t + constants.PARASITIC_FACTOR * 30) * t
-
-			vi = vf
-			self.end_position += x
-			velocities.append(vf)
+			vf = math.sqrt(vi * vi + 2 * a * x)
+			t = ((2 * x) / (vi + vf))
+			poss.append(pos)
+			vis.append(vi)
+			vfs.append(vf)
 			times.append(t)
+			pos += x
+			vi = vf
+
+		self.end_position = poss[-1]
+
+		sum_work = self.calculate_work(vfs, vis, poss, x)
+		t = np.array(times)
+		# W * s
+		total_energy = np.sum((sum_work / t + constants.PARASITIC_FACTOR * 30) * t)
 
 		self.calculate_energy(total_energy, times)
 
 		self.end_velocity = vf
-		self.average_velocity = sum(velocities) / len(velocities)
+		self.average_velocity = sum(vfs) / len(vfs)
 		self.section_time = sum(times)
 	
 	def calculate_energy(self, total_energy, times):
@@ -67,22 +74,31 @@ class Node:
 			self.start_percentage * constants.BATTERY_CAPACITY - (total_energy_out / constants.MOTOR_EFFICIENCY) + self.power_in(times)
 			) / constants.BATTERY_CAPACITY
 
-	def calculate_work(self, vf, vi, x):
-		# Change in gravity
-		gravity_work = constants.MASS * constants.GRAVITY * (get_elevation(
-			(self.end_position + x) / constants.TRACK_LENGTH, self.elevation_dict) - 
-			get_elevation(self.end_position / constants.TRACK_LENGTH, self.elevation_dict)
+	def calculate_work(self, vf_array, vi_array, pos_array, x):
+		# Convert inputs to numpy arrays
+		vf  = np.array(vf_array)
+		vi  = np.array(vi_array)
+		pos = np.array(pos_array)
+
+		# Change in gravity (vectorized)
+		gravity_work = constants.MASS * constants.GRAVITY * (
+			np.array(list(map(lambda p: get_elevation(p / constants.TRACK_LENGTH, self.elevation_dict), (pos + x) / constants.TRACK_LENGTH))) -
+			np.array(list(map(lambda p: get_elevation(p / constants.TRACK_LENGTH, self.elevation_dict), pos / constants.TRACK_LENGTH)))
 		)
-		# N * m
+
+		self.gravity_power = gravity_work # FIX THIS LATER COLIN
+
 		delta_work = (0.5 * constants.MASS * vf ** 2) - (0.5 * constants.MASS * vi ** 2)
+
 		sum_work = delta_work + (crr_force(vf) + drag_force(vf)) * x + gravity_work
+
 		return sum_work
 
 	def calculate_acceleration(self, vf, vi, x):
 		if (vf >= constants.MAX_VELOCITY):
 			a = 0
 		else:
-			a = (self.target_v ** 2 - vi ** 2) / 2 * x
+			a = (self.target_v ** 2 - vi ** 2) / (2 * x)
 			if (a <= constants.MIN_ACCELERATION):
 				a = constants.MIN_ACCELERATION
 			elif (a >= constants.MAX_ACCELERATION):
