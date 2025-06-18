@@ -26,7 +26,8 @@ class Track:
             if (battery_used >= self.b_i - self.b_f or time_driven >= self.duration):
                 break
             if math.floor(driver_time >= self.duration / constants.DRIVER_COUNT):
-                time_driven += constants.DRIVER_CHANGE_TIME # Add 5 minutes for a driver change
+                # Add 5 minutes for a driver change
+                time_driven += constants.DRIVER_CHANGE_TIME
                 velocity_i = 0
                 driver_time = 0
             lap = None
@@ -54,7 +55,6 @@ class Track:
 
     def check_time_charge_ratio(self, ratio, target_v):
         if (ratio < 1 + constants.BATTERY_TIME_TOLERANCE and ratio > 1 - constants.BATTERY_TIME_TOLERANCE):
-            print ("Yay")
             return target_v, True
         rmse = abs((1 - ratio))
         if (ratio > 1 + constants.BATTERY_TIME_TOLERANCE):

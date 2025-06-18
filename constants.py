@@ -20,7 +20,7 @@ TRACK_LENGTH                   = 5069      # m
 
 # Code adjustments
 BATTERY_TIME_TOLERANCE         = 0.01          # The smaller the more accurate; the more time required, 0.01 should be accurate enoguh
-SECTIONS                       = 100
+SECTIONS                       = 5069          # Legacy
 
 DRIVER_COUNT                   = 4
 DRIVER_CHANGE_TIME             = 300            # s

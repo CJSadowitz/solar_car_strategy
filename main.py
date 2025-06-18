@@ -14,7 +14,7 @@ def main():
 
 	# Precomute Elevation data
 	e_dict = get_track_edge("side_l.csv")
-	pos = list(range(0, 5069))  # Creates a list from 0 to 5068
+	pos = list(range(0, constants.TRACK_LENGTH))  # Creates a list from 0 to 5068
 	elevation_list = np.array(list(map(lambda p: get_elevation(p / constants.TRACK_LENGTH, e_dict), pos)))
 
 	# July 3, 2025, 10:00 AM CT

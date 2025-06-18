@@ -1,5 +1,4 @@
 from astral.sun import elevation
-from track_reader import get_elevation
 import datetime
 import math
 import constants
@@ -33,36 +32,26 @@ class Node:
 		a = constants.MAX_ACCELERATION
 		vf = vi
 		pos = self.start_position
-		times = []
-		vis = []
-		vfs = []
-		poss = []
+
 		x = 1
 		# Iterate through each meter of the designated section
-		for i in range(math.ceil(constants.TRACK_LENGTH / constants.SECTIONS)):
-			a = self.calculate_acceleration(vf, vi, x)
-			vf = math.sqrt(vi * vi + 2 * a * x)
-			t = ((2 * x) / (vi + vf))
-			poss.append(pos)
-			vis.append(vi)
-			vfs.append(vf)
-			times.append(t)
-			pos += x
-			vi = vf
+		a = self.calculate_acceleration(vf, vi, x)
+		vf = math.sqrt(vi * vi + 2 * a * x)
+		t = ((2 * x) / (vi + vf))
+		pos += x
+		vi = vf
 
-		sum_work = self.calculate_work(vfs, vis, poss, x)
-		t = np.array(times)
+		sum_work = self.calculate_work(vf, vi, pos, x)
 
-		self.gravity_power  = np.sum(self.gravity_work * t)
+		self.gravity_power  = self.gravity_work * t
 
 		# W * s
 		total_energy = np.sum((sum_work / t + constants.PARASITIC_FACTOR * 30) * t)
-		self.calculate_energy(total_energy, times)
+		self.calculate_energy(total_energy, t)
 
 		self.end_velocity = vf
-		self.end_position = poss[-1]
-		self.average_velocity = sum(vfs) / len(vfs)
-		self.section_time = sum(times)
+		self.end_position = pos
+		self.section_time = t
 	
 	def calculate_energy(self, total_energy, times):
 		total_energy_out = total_energy
@@ -75,21 +64,20 @@ class Node:
 			self.start_percentage * constants.BATTERY_CAPACITY - (total_energy_out / constants.MOTOR_EFFICIENCY) + self.power_in(times)
 			) / constants.BATTERY_CAPACITY
 
-	def calculate_work(self, vf_array, vi_array, pos_array, x):
+	def calculate_work(self, vf, vi, pos, x):
 		# Convert inputs to numpy arrays
-		vf  = np.array(vf_array)
-		vi  = np.array(vi_array)
-		pos = np.array(pos_array)
-		elv = np.array(self.e_list)
+		elv = self.e_list
 
 		# Change in gravity (vectorized)
+		p_f = (pos - 1 + x) % constants.TRACK_LENGTH
+		p_i = pos - 1
 		gravity_work = constants.MASS * constants.GRAVITY * (
-			elv[(pos).astype(int)] - elv[(pos + x).astype(int)]
+			elv[p_f] - elv[p_i]
 		)
 
-		self.gravity_work = gravity_work
+		self.gravity_work = np.sum(gravity_work)
 
-		delta_work = (0.5 * constants.MASS * np.square(vf)) - (0.5 * constants.MASS * np.square(vi))
+		delta_work = (0.5 * constants.MASS * vf * vf) - (0.5 * constants.MASS * vi * vi)
 
 		sum_work = delta_work + (crr_force(vf) + drag_force(vf)) * x + gravity_work
 
@@ -97,7 +85,7 @@ class Node:
 
 	def calculate_acceleration(self, vf, vi, x):
 		if (vf >= constants.MAX_VELOCITY):
-			a = 0
+			return 0
 		else:
 			a = (self.target_v ** 2 - vi ** 2) / (2 * x)
 			if (a <= constants.MIN_ACCELERATION):
@@ -106,21 +94,19 @@ class Node:
 				a = constants.MAX_ACCELERATION
 		return a
 
-	def power_in(self, times):
+	def power_in(self, t):
 		# Adjust this for different efficiency values
 		city = self.location
 		time_now = self.time
-		power_in = 0
-		for t in times:
-			solar_altitude = elevation(city.observer, time_now)
-			time_now = time_now + datetime.timedelta(seconds=t)
-			# kW
-			power = constants.MAX_PANEL_POWER * math.cos(math.radians(solar_altitude))
-			# kW * s
-			power_in += power * t
+		
+		solar_altitude = elevation(city.observer, time_now)
+		time_now = time_now + datetime.timedelta(seconds=t)
+		# kW
+		power = constants.MAX_PANEL_POWER * math.cos(math.radians(solar_altitude))
+		# kW * s
+		power_in = power * t
 
 		# kW * hrs
-		# print (f"POWER  IN: {power / 3600:.4f}")
 		self.section_power_in = power_in / 3600
 		return power_in / 3600
 
