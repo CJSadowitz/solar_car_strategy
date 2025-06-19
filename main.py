@@ -22,7 +22,6 @@ def main():
 		
 	# 	print(f"{readable_time} — Cloud Coverage: {cloud_coverage}%")
 
-
 	location = LocationInfo("Bowling Green", "USA", "America/Chicago", 36.97, -86.43)
 
 	laps = 0
