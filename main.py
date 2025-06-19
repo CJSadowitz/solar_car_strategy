@@ -6,8 +6,21 @@ from track_reader import get_track_edge, get_elevation
 import constants
 import cProfile
 import numpy as np
+import requests
 
 def main():
+	api_key = ""
+	city = "Bowling%20Green,US"
+	url = f"https://api.openweathermap.org/data/2.5/forecast?q={city}&appid={api_key}"
+	response = requests.get(url)
+	data = response.json()
+
+	for entry in data["list"]:
+		dt = entry["dt"]
+		cloud_coverage = entry["clouds"]["all"]
+		readable_time = datetime.utcfromtimestamp(dt).strftime('%Y-%m-%d %H:%M:%S UTC')
+		
+		print(f"{readable_time} — Cloud Coverage: {cloud_coverage}%")
 	location = LocationInfo("Bowling Green", "USA", "America/Chicago", 36.97, -86.43)
 
 	laps = 0
@@ -67,7 +80,7 @@ def main():
 	# laps += day_3.get_laps()
 	# # print (day_3.get_laps(), "laps")
 
-	print ("Total Laps:", laps)
+	# print ("Total Laps:", laps)
 
 if __name__ == "__main__":
 	main()
