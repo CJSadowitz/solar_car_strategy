@@ -12,15 +12,17 @@ COEFFICIENT_ROLLING_RESISTANCE = 0.0055
 
 # Fudge
 MAX_ACCELERATION               =  0.6            # m/s^2
-MIN_ACCELERATION               = -0.6           # m/s^2
-PARASITIC_FACTOR               = 1.0            # %
+MIN_ACCELERATION               = -0.6            # m/s^2
+PARASITIC_FACTOR               = 1.0             # %
 
 # Track Data
-TRACK_LENGTH                   = 5069      # m
+TRACK_LENGTH                   = 5070            # m 5069
+TRACK_BOWLING_GREEN            = True            # Allows for other tracks; assumes elevation is flat
+TRACK_SECTION_LENGTH           = 10              # m leave at 1 for the most accuracy
 
 # Code adjustments
-BATTERY_TIME_TOLERANCE         = 0.01          # The smaller the more accurate; the more time required, 0.01 should be accurate enoguh
-SECTIONS                       = 5069          # Legacy
+BATTERY_TIME_TOLERANCE         = 0.01            # The smaller the more accurate; the more time required, 0.01 should be accurate enoguh
+SECTIONS                       = 5069            # Legacy
 
 DRIVER_COUNT                   = 4
-DRIVER_CHANGE_TIME             = 300            # s
+DRIVER_CHANGE_TIME             = 300             # s

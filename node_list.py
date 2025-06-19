@@ -25,7 +25,7 @@ class Node_List:
 			self.e_list
 			)
 		)
-		for i in range(constants.SECTIONS - 1):
+		for i in range(int((constants.TRACK_LENGTH - 1) / constants.TRACK_SECTION_LENGTH)):
 			new_node = Node(
 				nodes[-1].target_v,
 				self.time_of_day + datetime.timedelta(seconds=nodes[-1].section_time),

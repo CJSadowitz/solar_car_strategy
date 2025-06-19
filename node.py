@@ -27,7 +27,7 @@ class Node:
 		vf = vi
 		pos = self.start_position
 
-		x = 1
+		x = constants.TRACK_SECTION_LENGTH
 		# Iterate through each meter of the designated section
 		a = self.calculate_acceleration(vf, vi, x)
 		vf = math.sqrt(vi * vi + 2 * a * x)
@@ -60,7 +60,7 @@ class Node:
 
 	def calculate_work(self, vf, vi, pos, x):
 		p_f = (pos - 1 + x) % constants.TRACK_LENGTH
-		p_i = pos - 1
+		p_i = (pos - 1) % constants.TRACK_LENGTH
 		gravity_work = constants.MASS * constants.GRAVITY * (
 			self.e_list[p_f] - self.e_list[p_i]
 		)
