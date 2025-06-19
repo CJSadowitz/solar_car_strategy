@@ -1,6 +1,6 @@
 from astral.sun import elevation
 import math
-import constants
+import src.constants
 
 # Every node is responsable for 5% of the track distance.
 class Node:
@@ -23,11 +23,10 @@ class Node:
 
 	def calc(self):
 		vi = self.start_velocity
-		a = constants.MAX_ACCELERATION
 		vf = vi
 		pos = self.start_position
 
-		x = constants.TRACK_SECTION_LENGTH
+		x = src.constants.TRACK_SECTION_LENGTH
 		# Iterate through each meter of the designated section
 		a = self.calculate_acceleration(vf, vi, x)
 		vf = math.sqrt(vi * vi + 2 * a * x)
@@ -40,7 +39,7 @@ class Node:
 		self.gravity_power  = self.gravity_work * t
 
 		# W * s
-		total_energy = (sum_work / t + constants.PARASITIC_FACTOR * 30) * t
+		total_energy = (sum_work / t + src.constants.PARASITIC_FACTOR * 30) * t
 		self.calculate_energy(total_energy, t)
 
 		self.end_velocity = vf
@@ -53,37 +52,37 @@ class Node:
 		total_energy_out = total_energy_out / 3600
 		# kW * hrs
 		total_energy_out = total_energy_out / 1000
-		self.section_power_out = total_energy_out / constants.MOTOR_EFFICIENCY
+		self.section_power_out = total_energy_out / src.constants.MOTOR_EFFICIENCY
 		self.end_percentage =  (
-			self.start_percentage * constants.BATTERY_CAPACITY - (total_energy_out / constants.MOTOR_EFFICIENCY) + self.power_in(times)
-			) / constants.BATTERY_CAPACITY
+			self.start_percentage * src.constants.BATTERY_CAPACITY - (total_energy_out / src.constants.MOTOR_EFFICIENCY) + self.power_in(times)
+			) / src.constants.BATTERY_CAPACITY
 
 	def calculate_work(self, vf, vi, pos, x):
-		p_f = (pos - 1 + x) % constants.TRACK_LENGTH
-		p_i = (pos - 1) % constants.TRACK_LENGTH
-		gravity_work = constants.MASS * constants.GRAVITY * (
+		p_f = (pos - 1 + x) % src.constants.TRACK_LENGTH
+		p_i = (pos - 1) % src.constants.TRACK_LENGTH
+		gravity_work = src.constants.MASS * src.constants.GRAVITY * (
 			self.e_list[p_f] - self.e_list[p_i]
 		)
 
 		self.gravity_work = gravity_work
-		delta_work = (0.5 * constants.MASS * vf * vf) - (0.5 * constants.MASS * vi * vi)
+		delta_work = (0.5 * src.constants.MASS * vf * vf) - (0.5 * src.constants.MASS * vi * vi)
 		sum_work = delta_work + (crr_force(vf) + drag_force(vf)) * x + gravity_work
 
 		return sum_work
 
 	def calculate_acceleration(self, vf, vi, x):
-		if vf >= constants.MAX_VELOCITY:
+		if vf >= src.constants.MAX_VELOCITY:
 			return 0
 		 
 		a = (self.target_v ** 2 - vi ** 2) / (2 * x)
 
-		return max(constants.MIN_ACCELERATION, min(a, constants.MAX_ACCELERATION))
+		return max(src.constants.MIN_ACCELERATION, min(a, src.constants.MAX_ACCELERATION))
 
 
 	def power_in(self, t):
 		solar_altitude = elevation(self.location.observer, self.time)
 		# kW
-		power = constants.MAX_PANEL_POWER * math.cos(math.radians(solar_altitude))
+		power = src.constants.MAX_PANEL_POWER * math.cos(math.radians(solar_altitude))
 		# kW * s
 		power_in = power * t
 
@@ -92,7 +91,7 @@ class Node:
 		return power_in / 3600
 
 def crr_force(v):
-	return constants.COEFFICIENT_ROLLING_RESISTANCE * (1 + (v * 3.6) / 161) * constants.WEIGHT
+	return src.constants.COEFFICIENT_ROLLING_RESISTANCE * (1 + (v * 3.6) / 161) * src.constants.WEIGHT
 
 def drag_force(v):
-	return (0.0451) * ((v * 3.6) * (v * 3.6)) * constants.FRONTAL_AREA * constants.COEFFICIENT_DRAG
+	return (0.0451) * ((v * 3.6) * (v * 3.6)) * src.constants.FRONTAL_AREA * src.constants.COEFFICIENT_DRAG

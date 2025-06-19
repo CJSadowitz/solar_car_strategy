@@ -1,5 +1,5 @@
-from node_list import Node_List
-import constants
+from src.node_list import Node_List
+import src.constants
 import math
 
 class Track:
@@ -19,14 +19,14 @@ class Track:
         battery_used = 0
         battery_i = self.b_i
         velocity_i = 0
-        target_v = constants.MAX_VELOCITY
+        target_v = src.constants.MAX_VELOCITY
         driver_time = 0
         while True:
             if (battery_used >= self.b_i - self.b_f or time_driven >= self.duration):
                 break
-            if math.floor(driver_time >= self.duration / constants.DRIVER_COUNT):
+            if math.floor(driver_time >= self.duration / src.constants.DRIVER_COUNT):
                 # Add 5 minutes for a driver change
-                time_driven += constants.DRIVER_CHANGE_TIME
+                time_driven += src.constants.DRIVER_CHANGE_TIME
                 velocity_i = 0
                 driver_time = 0
             lap = None
@@ -53,10 +53,10 @@ class Track:
         self.laps = laps
 
     def check_time_charge_ratio(self, ratio, target_v):
-        if (ratio < 1 + constants.BATTERY_TIME_TOLERANCE and ratio > 1 - constants.BATTERY_TIME_TOLERANCE):
+        if (ratio < 1 + src.constants.BATTERY_TIME_TOLERANCE and ratio > 1 - src.constants.BATTERY_TIME_TOLERANCE):
             return target_v, True
         rmse = abs((1 - ratio))
-        if (ratio > 1 + constants.BATTERY_TIME_TOLERANCE):
+        if (ratio > 1 + src.constants.BATTERY_TIME_TOLERANCE):
             # Battery Ratio is bigger than time ratio (battery is the problem)
             if (target_v != 0):
                 target_v -= rmse
@@ -66,7 +66,7 @@ class Track:
                 return target_v, True
         else:
             # Time Ratio is bigger than battery ratio (time is the problem)
-            if (target_v != constants.MAX_VELOCITY):
+            if (target_v != src.constants.MAX_VELOCITY):
                 target_v += rmse
                 # print ("Time:", target_v, ratio)
             else:

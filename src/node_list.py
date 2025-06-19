@@ -1,5 +1,5 @@
-from node import Node
-import constants
+from src.node import Node
+import src.constants
 import datetime
 
 class Node_List:
@@ -25,7 +25,7 @@ class Node_List:
 			self.e_list
 			)
 		)
-		for i in range(int((constants.TRACK_LENGTH - 1) / constants.TRACK_SECTION_LENGTH)):
+		for i in range(int((src.constants.TRACK_LENGTH - 1) / src.constants.TRACK_SECTION_LENGTH)):
 			new_node = Node(
 				nodes[-1].target_v,
 				self.time_of_day + datetime.timedelta(seconds=nodes[-1].section_time),
@@ -62,7 +62,7 @@ class Node_List:
 			print(f"""
 			===========================================
 			Iteration:         {i}
-			Battery:          {node.start_percentage * constants.BATTERY_CAPACITY:.2f}, {node.end_percentage * constants.BATTERY_CAPACITY:.2f}
+			Battery:          {node.start_percentage * src.constants.BATTERY_CAPACITY:.2f}, {node.end_percentage * src.constants.BATTERY_CAPACITY:.2f}
 			Power_Used:       {self.get_battery_used() * 1000:.2f} W * hrs
 			Gravity_Power:    {node.gravity_power:.4f} W * hrs
 			Section_Time:     {node.section_time:.2f} seconds
